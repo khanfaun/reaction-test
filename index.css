@@ -169,3 +169,16 @@ body {
   color: white;
   text-align: center;
 }
+#rankList .rank-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1vh;
+  color: white;
+  width: 50px;
+}
+#rankList .rank-item img {
+  height: 24px;
+  width: auto;
+}
+
