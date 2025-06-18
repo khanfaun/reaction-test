@@ -128,5 +128,4 @@ export function getTitleFromScores(scores, mode) {
 
   return generateRankHTML(idx, progress)
 }
-export { ranks }
 
