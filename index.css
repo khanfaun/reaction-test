@@ -140,4 +140,15 @@ body {
 #currentTitle img {
   height: 24px;    /* tăng từ 20px */
 }
+.rank-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 2.2vh;
+  font-weight: bold;
+}
+.rank-display img {
+  height: 24px;
+}
 
