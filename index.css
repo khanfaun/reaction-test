@@ -81,7 +81,7 @@ body {
   position: relative;
 }
 .red {
-  background-color: #8B0000;
+  background-color: red;
 }
 
 .green {
@@ -89,23 +89,23 @@ body {
 }
 
 .yellow {
-  background-color: yellow;
-}
-
-.purple {
-  background-color: purple;
+  background-color: #e0c000; /* vàng sẫm hơn */
 }
 
 .pink {
-  background-color: pink;
+  background-color: #d87093; /* hồng sẫm */
+}
+
+.cyan {
+  background-color: #20b2aa; /* xanh ngọc sẫm */
 }
 
 .orange {
   background-color: orange;
 }
 
-.cyan {
-  background-color: cyan;
+.purple {
+  background-color: purple;
 }
 
 .blue {
@@ -134,4 +134,10 @@ body {
   cursor: pointer;
 }
 
+#currentTitle {
+  font-size: 2.2vh; /* tăng từ 1.8vh */
+}
+#currentTitle img {
+  height: 24px;    /* tăng từ 20px */
+}
 
