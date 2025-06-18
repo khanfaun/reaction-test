@@ -34,20 +34,20 @@
 
   <!-- Popup biểu đồ -->
   <div id="chartModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; z-index: 1000;">
-    <div style="background: #1F4591; padding: 20px; border-radius: 12px; position: relative; text-align: center; display: flex; flex-direction: row;">
+    <div id="chartContentWrapper" style="display: flex; flex-direction: row; background: #1F4591; border-radius: 12px; padding: 20px; max-width: 820px; width: 100%; box-sizing: border-box;">
 
       <!-- Danh sách rank -->
       <div id="rankList" style="display: none; width: 220px; background: #1A3478; padding: 12px; color: white; border-radius: 12px 0 0 12px;">
         <!-- JS sẽ render nội dung -->
       </div>
 
-      <!-- Khối nội dung chính -->
+      <!-- Nội dung chính -->
       <div style="position: relative; flex-grow: 1; padding-left: 16px;">
 
         <!-- Nút đóng -->
         <button id="closeChartBtn" style="position: absolute; top: 10px; right: 10px; font-size: 20px; background: transparent; border: none; color: white; cursor: pointer;">✖</button>
 
-        <!-- Nút mũi tên toggle -->
+        <!-- Mũi tên toggle -->
         <div id="toggleRankList" style="position: absolute; left: -24px; top: 50%; transform: translateY(-50%) rotate(0deg); cursor: pointer; transition: transform 0.3s;">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
         </div>
@@ -74,7 +74,6 @@
             </svg>
           </button>
         </div>
-
       </div>
     </div>
   </div>
