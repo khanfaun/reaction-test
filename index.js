@@ -24,6 +24,43 @@ greenCircle.className = 'green-circle'
 greenCircle.style.display = 'none'
 document.body.appendChild(greenCircle)
 
+// ⚙️ Bản đồ mã màu theo class
+const colorMap = {
+  blue: '#1F4591',
+  pink: '#ff80bf',
+  yellow: '#ffd966',
+  purple: '#b266ff',
+  green: '#00cc66',
+  red: '#cc0033'
+}
+
+// Tính độ tương phản trắng/đen
+function getContrastYIQ(hexcolor) {
+  const r = parseInt(hexcolor.substr(1, 2), 16)
+  const g = parseInt(hexcolor.substr(3, 2), 16)
+  const b = parseInt(hexcolor.substr(5, 2), 16)
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000
+  return (yiq >= 128) ? 'black' : 'white'
+}
+
+// Đổi màu icon SVG và chữ của nút biểu đồ
+function applyContrastColorToChartBtn() {
+  const btn = document.getElementById('showChartBtn')
+  const svg = btn.querySelector('svg')
+
+  const activeColorClass = Array.from(clickarea.classList).find(cls =>
+    Object.keys(colorMap).includes(cls)
+  )
+
+  const hex = colorMap[activeColorClass] || '#1F4591'
+  const contrast = getContrastYIQ(hex)
+
+  btn.style.color = contrast
+  svg.style.filter = contrast === 'white'
+    ? 'brightness(0) invert(1)'
+    : 'brightness(0) invert(0)'
+}
+
 function resetColors() {
   clickarea.className = 'clickarea'
 }
@@ -53,7 +90,7 @@ function updateScores(newScore) {
   bestScoreSpan.textContent = `Best: ${best} ms`
 
   const title = getTitleFromScores(list, mode)
-  currentTitle.textContent = `Xếp hạng: ${title}`
+  currentTitle.innerHTML = title
 }
 
 function startWaitingPhase() {
@@ -138,10 +175,8 @@ function handleClick(e) {
 
   if (gameState === 'idle') {
     startWaitingPhase()
-
   } else if (gameState === 'waiting') {
     return
-
   } else if (gameState === 'color') {
     if (currentColor === 'green') {
       if (modeSelect.value === 'hard') {
@@ -158,7 +193,6 @@ function handleClick(e) {
       const reactionTime = new Date() - finishTime
       updateText(`${reactionTime}ms`, 'Click để tiếp tục')
       updateScores(reactionTime)
-
     } else {
       gameState = 'result'
       clearTimeout(colorTimeout)
@@ -166,7 +200,6 @@ function handleClick(e) {
       clickarea.classList.add('blue')
       updateText('Sai màu!', 'Click để tiếp tục')
     }
-
   } else if (gameState === 'result') {
     startWaitingPhase()
   }
@@ -206,13 +239,14 @@ function showIdleState() {
 
   const mode = modeSelect.value
   const scores = getScores(mode)
-  currentTitle.textContent = `Xếp hạng: ${getTitleFromScores(scores, mode)}`
+  currentTitle.innerHTML = getTitleFromScores(scores, mode)
+  applyContrastColorToChartBtn()
 }
 
 function renderChartForMode(mode) {
   const scores = getScores(mode)
   drawChart(mode)
-  highestTitle.textContent = `🏆 Xếp hạng: ${getTitleFromScores(scores, mode)}`
+  highestTitle.innerHTML = `Xếp hạng: ${getTitleFromScores(scores, mode)}`
 }
 
 document.querySelectorAll('.chart-mode-btn').forEach(btn => {
