@@ -226,3 +226,4 @@ document.querySelectorAll('.chart-mode-btn').forEach(btn => {
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
 
+
