@@ -91,10 +91,13 @@ function runColorSequence(index) {
     return
   }
 
-  if (nextColor === 'green') {
-    finishTime = new Date()
-    updateText('Click')
-  }
+ if (nextColor === 'green') {
+  finishTime = new Date()
+  updateText('Click')
+} else {
+  updateText('Đợi màu xanh lá')
+}
+
 
   resetColors()
   currentColor = nextColor
@@ -176,6 +179,7 @@ clickarea.addEventListener('touchstart', handleClick)
 
 modeSelect.addEventListener('change', () => {
   bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+  greenCircle.style.display = 'none' // <-- Dòng này cần thêm
   showIdleState()
 })
 
@@ -221,3 +225,4 @@ document.querySelectorAll('.chart-mode-btn').forEach(btn => {
 
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+
