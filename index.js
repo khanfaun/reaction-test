@@ -269,3 +269,33 @@ document.getElementById('resetScoresBtn').addEventListener('click', () => {
 
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+
+import { ranks } from './chart.js'
+
+const toggleArrow = document.getElementById('toggleRankList')
+const rankList = document.getElementById('rankList')
+let isRankListVisible = false
+
+toggleArrow.addEventListener('click', () => {
+  isRankListVisible = !isRankListVisible
+  rankList.style.display = isRankListVisible ? 'block' : 'none'
+  toggleArrow.style.transform = `translateY(-50%) rotate(${isRankListVisible ? 180 : 0}deg)`
+})
+
+function renderRankList() {
+  rankList.innerHTML = ''
+  ranks.slice(1).forEach((rank, i) => {
+    const item = document.createElement('div')
+    item.style.display = 'flex'
+    item.style.alignItems = 'center'
+    item.style.gap = '8px'
+    item.style.marginBottom = '10px'
+    item.innerHTML = `
+      <img src="img/skillgroup${i + 1}.png" alt="${rank}" style="height: 20px;">
+      <span style="font-size: 1.4vh;">${rank}</span>
+    `
+    rankList.appendChild(item)
+  })
+}
+renderRankList()
+
