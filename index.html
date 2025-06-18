@@ -107,23 +107,28 @@
         Hệ thống không lỗi. Chỉ có bạn lỗi. Hãy phản xạ nhanh hơn, nhiều lần hơn.
       </div>
 
-      <div id="chartModeButtons" style="margin-top: 10px; margin-bottom: 10px;">
-        <button class="chart-mode-btn" data-mode="easy">Dễ</button>
-        <button class="chart-mode-btn" data-mode="medium">Trung bình</button>
-        <button class="chart-mode-btn" data-mode="hard">Khó</button>
-        <!-- ✅ Nút xóa dữ liệu -->
-        <button id="resetScoresBtn" style="
-          margin-left: 12px;
-          background: #d33;
-          color: white;
-          border: none;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-size: 1.5vh;
-          cursor: pointer;">Xóa dữ liệu</button>
-      </div>
-
+     
       <canvas id="chartCanvas" width="500" height="250" style="margin-top: 20px;"></canvas>
+       <!-- Nút chọn chế độ căn giữa -->
+<div style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
+  <button class="chart-mode-btn" data-mode="easy">Dễ</button>
+  <button class="chart-mode-btn" data-mode="medium">Trung bình</button>
+  <button class="chart-mode-btn" data-mode="hard">Khó</button>
+</div>
+
+<!-- Nút xóa dữ liệu nằm góc dưới bên trái -->
+<button id="resetScoresBtn" style="
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: #d33;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 1.5vh;
+  cursor: pointer;">Xóa dữ liệu</button>
+
     </div>
   </div>
 
