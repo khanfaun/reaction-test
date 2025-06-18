@@ -151,4 +151,20 @@ body {
 .rank-display img {
   height: 24px;
 }
+.xp-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 3px;
+  margin: 4px 0 2px;
+}
+.xp-fill {
+  height: 100%;
+  background: #4FC3F7;
+  border-radius: 3px;
+}
+.xp-text {
+  font-size: 1.2vh;
+  color: white;
+}
 
