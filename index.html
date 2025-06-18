@@ -46,6 +46,21 @@
       cursor: pointer;
       padding: 4px;
     }
+
+    #rankList .rank-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 1vh;
+      color: white;
+      width: 60px;
+      text-align: center;
+    }
+
+    #rankList .rank-item img {
+      height: 24px;
+      width: auto;
+    }
   </style>
 </head>
 <body>
@@ -87,53 +102,60 @@
       padding: 20px;
       border-radius: 12px;
       position: relative;
-      text-align: center;">
-      
-      <button id="closeChartBtn" style="
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 20px;
-        background: transparent;
-        border: none;
-        color: white;
-        cursor: pointer;">✖</button>
-
-      <div id="highestTitle" style="color: white; font-size: 2.2vh; margin-bottom: 10px;">
-        🏆 Xếp hạng: --
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      width: 90%;
+      max-width: 900px;
+      text-align: left;
+      box-sizing: border-box;
+    ">
+      <!-- Cột bên trái: danh sách rank -->
+      <div id="rankList" style="display: flex; flex-direction: column; gap: 8px;">
+        <!-- JS sẽ render -->
       </div>
 
-      <div style="color: #ccc; font-size: 1vh;">
-        Hệ thống không lỗi. Chỉ có bạn lỗi. Hãy phản xạ nhanh hơn, nhiều lần hơn.
+      <!-- Cột bên phải: nội dung biểu đồ -->
+      <div style="flex: 1; position: relative;">
+        <button id="closeChartBtn" style="
+          position: absolute;
+          top: 0;
+          right: 0;
+          font-size: 20px;
+          background: transparent;
+          border: none;
+          color: white;
+          cursor: pointer;">✖</button>
+
+        <div id="highestTitle" style="color: white; font-size: 2.2vh; margin-bottom: 10px;">
+          🏆 Xếp hạng: --
+        </div>
+
+        <div style="color: #ccc; font-size: 1vh;">
+          Hệ thống không lỗi. Chỉ có bạn lỗi. Hãy phản xạ nhanh hơn, nhiều lần hơn.
+        </div>
+
+        <canvas id="chartCanvas" width="500" height="250" style="margin-top: 20px;"></canvas>
+
+        <div id="chartModeButtons" style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
+          <button class="chart-mode-btn" data-mode="easy">Dễ</button>
+          <button class="chart-mode-btn" data-mode="medium">Trung bình</button>
+          <button class="chart-mode-btn" data-mode="hard">Khó</button>
+
+          <button id="resetScoresBtn" style="
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+          " title="Xóa dữ liệu">
+            <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" fill="white">
+              <path d="M12 6V4L8 8l4 4V9c2.76 0 5 2.24 5 5 0 1.29-.49 2.47-1.29 3.36l1.42 1.42C18.4 17.37 19 15.76 19 14c0-3.87-3.13-7-7-7zm-5.71.64L4.86 8.07C3.6 9.63 3 11.24 3 13c0 3.87 3.13 7 7 7v2l4-4-4-4v2c-2.76 0-5-2.24-5-5 0-1.29.49-2.47 1.29-3.36z"/>
+            </svg>
+          </button>
+        </div>
       </div>
-
-     
-      <canvas id="chartCanvas" width="500" height="250" style="margin-top: 20px;"></canvas>
-<!-- Nhóm nút chế độ + reset chung hàng, căn giữa -->
-<div id="chartModeButtons" style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
-  <button class="chart-mode-btn" data-mode="easy">Dễ</button>
-  <button class="chart-mode-btn" data-mode="medium">Trung bình</button>
-  <button class="chart-mode-btn" data-mode="hard">Khó</button>
-
-  <!-- Nút reset icon -->
-  <button id="resetScoresBtn" style="
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-  " title="Xóa dữ liệu">
-    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" fill="white">
-      <path d="M12 6V4L8 8l4 4V9c2.76 0 5 2.24 5 5 0 1.29-.49 2.47-1.29 3.36l1.42 1.42C18.4 17.37 19 15.76 19 14c0-3.87-3.13-7-7-7zm-5.71.64L4.86 8.07C3.6 9.63 3 11.24 3 13c0 3.87 3.13 7 7 7v2l4-4-4-4v2c-2.76 0-5-2.24-5-5 0-1.29.49-2.47 1.29-3.36z"/>
-    </svg>
-  </button>
-</div>
-<!-- Danh sách các rank -->
-<div id="rankList" style="margin-top: 20px; display: flex; justify-content: center; flex-wrap: wrap; gap: 12px;">
-  <!-- Các rank sẽ được chèn động bằng JS -->
-</div>
-
     </div>
   </div>
 
