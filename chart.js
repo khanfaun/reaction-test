@@ -52,10 +52,12 @@ export function drawChart(mode) {
   chartInstance = new Chart(ctx, config)
 }
 
-// 🎯 Tính điểm trung bình phản xạ tốt (≤ 300ms)
+// 🎯 Tính điểm trung bình phản xạ tốt với maxTime riêng cho từng chế độ
 function computeScore(scores, mode) {
   const weight = { easy: 0.7, medium: 1.0, hard: 1.3 }[mode] || 1.0
-  const valid = scores.filter(t => t <= 300)
+  const maxTime = { easy: 300, medium: 300, hard: 350 }[mode] || 300
+
+  const valid = scores.filter(t => t <= maxTime)
   const validScores = valid.map(t => ((300 - t) / 150 * weight).toFixed(3)).map(Number)
   const total = validScores.reduce((s, v) => s + v, 0)
   const average = validScores.length ? total / validScores.length : 0
@@ -106,6 +108,7 @@ export function getTitleFromScores(scores, mode) {
   if (!scores.length) return generateRankHTML(0)
 
   const { average, count } = computeScore(scores, mode)
+
   let idx = 0
   for (let i = thresholds.length - 1; i >= 0; i--) {
     if (average >= thresholds[i].avg && count >= thresholds[i].count) {
@@ -114,7 +117,7 @@ export function getTitleFromScores(scores, mode) {
     }
   }
 
-  // compute progress toward next rank
+  // Tính % đến rank tiếp theo
   let progress = 0
   if (idx < thresholds.length) {
     const cur = thresholds[idx - 1] || { avg: 0, count: 1 }
@@ -128,4 +131,3 @@ export function getTitleFromScores(scores, mode) {
 
   return generateRankHTML(idx, progress)
 }
-
