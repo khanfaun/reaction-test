@@ -91,19 +91,17 @@ function runColorSequence(index) {
     return
   }
 
- if (nextColor === 'green') {
-  finishTime = new Date()
-  updateText('Click')
-} else {
-  updateText('Đợi màu xanh lá')
-}
-
+  if (nextColor === 'green') {
+    finishTime = new Date()
+    updateText('Click')
+  } else {
+    updateText('Đợi màu xanh lá')
+  }
 
   resetColors()
   currentColor = nextColor
   clickarea.classList.add(currentColor)
 
-  updateText('Đợi màu xanh lá')
   colorTimeout = setTimeout(() => runColorSequence(index + 1), colorSequence[index].delay)
 }
 
@@ -140,10 +138,8 @@ function handleClick(e) {
 
   if (gameState === 'idle') {
     startWaitingPhase()
-
   } else if (gameState === 'waiting') {
     return
-
   } else if (gameState === 'color') {
     if (currentColor === 'green') {
       if (modeSelect.value === 'hard') {
@@ -160,7 +156,6 @@ function handleClick(e) {
       const reactionTime = new Date() - finishTime
       updateText(`${reactionTime}ms`, 'Click để tiếp tục')
       updateScores(reactionTime)
-
     } else {
       gameState = 'result'
       clearTimeout(colorTimeout)
@@ -168,7 +163,6 @@ function handleClick(e) {
       clickarea.classList.add('blue')
       updateText('Sai màu!', 'Click để tiếp tục')
     }
-
   } else if (gameState === 'result') {
     startWaitingPhase()
   }
@@ -178,8 +172,9 @@ clickarea.addEventListener('click', handleClick)
 clickarea.addEventListener('touchstart', handleClick)
 
 modeSelect.addEventListener('change', () => {
+  clearTimeout(colorTimeout) // dừng chuỗi màu đang chạy
   bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
-  greenCircle.style.display = 'none' // <-- Dòng này cần thêm
+  greenCircle.style.display = 'none'
   showIdleState()
 })
 
@@ -225,5 +220,6 @@ document.querySelectorAll('.chart-mode-btn').forEach(btn => {
 
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+
 
 
