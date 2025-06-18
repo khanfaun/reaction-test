@@ -1,7 +1,7 @@
 import { prepareEasyModeSequence } from './modes/easyMode.js'
 import { prepareMediumModeSequence } from './modes/mediumMode.js'
 import { prepareHardModeSequence } from './modes/hardMode.js'
-import { drawChart, getTitleFromScores, ranks } from './chart.js'
+import { drawChart, getTitleFromScores } from './chart.js'
 
 let gameState = 'idle'
 let finishTime = null
@@ -24,6 +24,7 @@ greenCircle.className = 'green-circle'
 greenCircle.style.display = 'none'
 document.body.appendChild(greenCircle)
 
+// ⚙️ Bản đồ mã màu theo class
 const colorMap = {
   blue: '#1F4591',
   pink: '#ff80bf',
@@ -33,6 +34,7 @@ const colorMap = {
   red: '#cc0033'
 }
 
+// Tính độ tương phản trắng/đen
 function getContrastYIQ(hexcolor) {
   const r = parseInt(hexcolor.substr(1, 2), 16)
   const g = parseInt(hexcolor.substr(3, 2), 16)
@@ -41,6 +43,7 @@ function getContrastYIQ(hexcolor) {
   return (yiq >= 128) ? 'black' : 'white'
 }
 
+// Đổi màu icon SVG và chữ của nút biểu đồ
 function applyContrastColorToChartBtn() {
   const btn = document.getElementById('showChartBtn')
   const svg = btn.querySelector('svg')
@@ -252,7 +255,6 @@ document.querySelectorAll('.chart-mode-btn').forEach(btn => {
     renderChartForMode(mode)
   })
 })
-
 document.getElementById('resetScoresBtn').addEventListener('click', () => {
   const mode = modeSelect.value
   if (confirm(`Bạn có chắc muốn xóa toàn bộ dữ liệu của chế độ "${mode}"?`)) {
@@ -264,34 +266,8 @@ document.getElementById('resetScoresBtn').addEventListener('click', () => {
   }
 })
 
-// 🔽 Toggle rank list
-const toggleArrow = document.getElementById('toggleRankList')
-const rankList = document.getElementById('rankList')
-let isRankListVisible = false
-
-toggleArrow.addEventListener('click', () => {
-  isRankListVisible = !isRankListVisible
-  rankList.style.display = isRankListVisible ? 'block' : 'none'
-  toggleArrow.style.transform = `translateY(-50%) rotate(${isRankListVisible ? 180 : 0}deg)`
-})
-
-// 🔽 Render danh sách rank
-function renderRankList() {
-  rankList.innerHTML = ''
-  ranks.slice(1).forEach((rank, i) => {
-    const item = document.createElement('div')
-    item.style.display = 'flex'
-    item.style.alignItems = 'center'
-    item.style.gap = '8px'
-    item.style.marginBottom = '10px'
-    item.innerHTML = `
-      <img src="img/skillgroup${i + 1}.png" alt="${rank}" style="height: 20px;">
-      <span style="font-size: 1.4vh;">${rank}</span>
-    `
-    rankList.appendChild(item)
-  })
-}
-renderRankList()
 
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+
+
