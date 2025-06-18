@@ -52,7 +52,7 @@ function updateScores(newScore) {
   localStorage.setItem(`best_${mode}`, best)
   bestScoreSpan.textContent = `Best: ${best} ms`
 
-  const title = getTitleFromScores(list)
+  const title = getTitleFromScores(list, mode)
   currentTitle.textContent = `Xếp hạng: ${title}`
 }
 
@@ -87,17 +87,16 @@ function runColorSequence(index) {
   if (nextColor === 'green' && modeSelect.value === 'hard') {
     currentColor = nextColor
     showGreenCircle()
-    gameState = 'color' // vẫn trong trạng thái chờ click
+    gameState = 'color'
     return
   }
 
- if (nextColor === 'green') {
-  finishTime = new Date()
-  updateText('Click')
-} else {
-  updateText('Đợi màu xanh lá')
-}
-
+  if (nextColor === 'green') {
+    finishTime = new Date()
+    updateText('Click')
+  } else {
+    updateText('Đợi màu xanh lá')
+  }
 
   resetColors()
   currentColor = nextColor
@@ -177,8 +176,9 @@ clickarea.addEventListener('click', handleClick)
 clickarea.addEventListener('touchstart', handleClick)
 
 modeSelect.addEventListener('change', () => {
+  clearTimeout(colorTimeout)
   bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
-  greenCircle.style.display = 'none' // <-- Dòng này cần thêm
+  greenCircle.style.display = 'none'
   showIdleState()
 })
 
@@ -206,13 +206,13 @@ function showIdleState() {
 
   const mode = modeSelect.value
   const scores = getScores(mode)
-  currentTitle.textContent = `Danh hiệu: ${getTitleFromScores(scores)}`
+  currentTitle.textContent = `Xếp hạng: ${getTitleFromScores(scores, mode)}`
 }
 
 function renderChartForMode(mode) {
   const scores = getScores(mode)
   drawChart(mode)
-  highestTitle.textContent = `🏆 Xếp hạng: ${getTitleFromScores(scores)}`
+  highestTitle.textContent = `🏆 Xếp hạng: ${getTitleFromScores(scores, mode)}`
 }
 
 document.querySelectorAll('.chart-mode-btn').forEach(btn => {
