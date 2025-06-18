@@ -2,7 +2,6 @@ let chartInstance = null
 
 export function drawChart(mode) {
 	const list = JSON.parse(sessionStorage.getItem(`scores_${mode}`)) || []
-
 	if (list.length === 0) return
 
 	const ctx = document.getElementById('chartCanvas')?.getContext('2d')
@@ -75,14 +74,23 @@ export function drawChart(mode) {
 	chartInstance = new Chart(ctx, config)
 }
 
-export function getTitleFromScores(scores) {
-	if (!scores.length) return '--'
-	const latest = scores[scores.length - 1]
-	if (latest <= 100) return '30000 Elo'
-	if (latest <= 150) return '15000 Elo'
-	if (latest <= 200) return '1000 Elo'
-	if (latest <= 250) return '7000 Elo'
-	if (latest <= 300) return '4000 Elo'
-	return '1000 Elo'
+// 🎯 Tính điểm theo hiệu suất phản xạ tốt
+function computeScore(scores) {
+	const THRESHOLD = 200
+	return scores.reduce((sum, t) => {
+		if (t > THRESHOLD) return sum
+		return sum + ((THRESHOLD - t) / THRESHOLD)
+	}, 0)
 }
 
+// 🏆 Danh hiệu dựa trên tổng điểm
+export function getTitleFromScores(scores) {
+	if (!scores.length) return '--'
+	const totalScore = computeScore(scores)
+
+	if (totalScore >= 15) return '30000 Elo'
+	if (totalScore >= 10) return '15000 Elo'
+	if (totalScore >= 5) return '7000 Elo'
+	if (totalScore >= 2) return '4000 Elo'
+	return '1000 Elo'
+}
