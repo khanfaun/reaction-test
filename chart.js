@@ -1,130 +1,301 @@
-let chartInstance = null
+import { prepareEasyModeSequence } from './modes/easyMode.js'
+import { prepareMediumModeSequence } from './modes/mediumMode.js'
+import { prepareHardModeSequence } from './modes/hardMode.js'
+import { drawChart, getTitleFromScores } from './chart.js'
 
-export function drawChart(mode) {
-  const list = JSON.parse(localStorage.getItem(`scores_${mode}`)) || []
-  if (list.length === 0) return
+let gameState = 'idle'
+let finishTime = null
+let currentColor = ''
+let colorSequence = []
+let colorTimeout = null
+let currentColorBeforeGreen = 'blue'
 
-  const ctx = document.getElementById('chartCanvas')?.getContext('2d')
-  if (!ctx) return
+const clickarea = document.querySelector('.clickarea')
+const message = document.querySelector('.message')
+const note = document.querySelector('.note')
+const modeSelect = document.getElementById('mode')
+const bestScoreSpan = document.getElementById('bestScore')
+const chartModal = document.getElementById('chartModal')
+const currentTitle = document.getElementById('currentTitle')
+const highestTitle = document.getElementById('highestTitle')
 
-  const buckets = Array(20).fill(0)
-  list.forEach(score => {
-    let index = Math.floor(score / 25)
-    if (index >= buckets.length) index = buckets.length - 1
-    buckets[index]++
-  })
+const greenCircle = document.createElement('div')
+greenCircle.className = 'green-circle'
+greenCircle.style.display = 'none'
+document.body.appendChild(greenCircle)
 
-  const labels = buckets.map((_, i) => `${i * 25}`)
-  const data = {
-    labels,
-    datasets: [{
-      label: 'Số lần',
-      data: buckets,
-      fill: true,
-      borderColor: '#4FC3F7',
-      backgroundColor: 'rgba(79, 195, 247, 0.2)',
-      pointBackgroundColor: '#4FC3F7',
-      tension: 0.3
-    }]
-  }
-
-  const config = {
-    type: 'line',
-    data,
-    options: {
-      scales: {
-        x: {
-          title: { display: true, text: 'Tốc độ phản xạ (ms)', color: '#fff' },
-          ticks: { color: '#fff', callback: v => labels[v], font: { family: 'Montserrat', size: 12 } },
-          grid: { color: 'rgba(255,255,255,0.1)' }
-        },
-        y: {
-          title: { display: true, text: 'Số lần đạt được', color: '#fff' },
-          ticks: { color: '#fff', stepSize: 1, font: { family: 'Montserrat', size: 12 } },
-          grid: { color: 'rgba(255,255,255,0.1)' }
-        }
-      },
-      plugins: { legend: { display: false } }
-    }
-  }
-
-  if (chartInstance) chartInstance.destroy()
-  chartInstance = new Chart(ctx, config)
+// ⚙️ Bản đồ mã màu theo class
+const colorMap = {
+  blue: '#1F4591',
+  pink: '#ff80bf',
+  yellow: '#ffd966',
+  purple: '#b266ff',
+  green: '#00cc66',
+  red: '#cc0033'
 }
 
-// 🎯 Tính điểm trung bình phản xạ tốt (≤ 300ms)
-function computeScore(scores, mode) {
-  const weight = { easy: 0.7, medium: 1.0, hard: 1.3 }[mode] || 1.0
-  const valid = scores.filter(t => t <= 300)
-  const validScores = valid.map(t => ((300 - t) / 150 * weight).toFixed(3)).map(Number)
-  const total = validScores.reduce((s, v) => s + v, 0)
-  const average = validScores.length ? total / validScores.length : 0
-  return { average, count: validScores.length }
+// Tính độ tương phản trắng/đen
+function getContrastYIQ(hexcolor) {
+  const r = parseInt(hexcolor.substr(1, 2), 16)
+  const g = parseInt(hexcolor.substr(3, 2), 16)
+  const b = parseInt(hexcolor.substr(5, 2), 16)
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000
+  return (yiq >= 128) ? 'black' : 'white'
 }
 
-const ranks = [
-  'Chưa có rank',
-  'Silver 1','Silver 2','Silver 3','Silver 4',
-  'Silver Elite','Silver Elite Master','Nova 1',
-  'Nova 2','Nova 3','Nova Master',
-  'Master Guardian 1','Master Guardian 2','Master Guardian Elite',
-  'Distinguished Master Guardian','Legendary Eagle',
-  'Legendary Eagle Master','Supreme Master First Class','Global Elite'
-]
+// Đổi màu icon SVG và chữ của nút biểu đồ
+function applyContrastColorToChartBtn() {
+  const btn = document.getElementById('showChartBtn')
+  const svg = btn.querySelector('svg')
 
-const thresholds = [
-  { avg: 0.00, count: 1 },
-  { avg: 0.05, count: 2 },
-  { avg: 0.08, count: 3 },
-  { avg: 0.10, count: 4 },
-  { avg: 0.12, count: 5 },
-  { avg: 0.15, count: 6 },
-  { avg: 0.18, count: 7 },
-  { avg: 0.21, count: 8 },
-  { avg: 0.24, count: 9 },
-  { avg: 0.27, count: 10 },
-  { avg: 0.30, count: 11 },
-  { avg: 0.35, count: 12 },
-  { avg: 0.40, count: 13 },
-  { avg: 0.45, count: 14 },
-  { avg: 0.50, count: 15 },
-  { avg: 0.55, count: 16 },
-  { avg: 0.65, count: 17 },
-  { avg: 0.75, count: 18 }
-]
+  const activeColorClass = Array.from(clickarea.classList).find(cls =>
+    Object.keys(colorMap).includes(cls)
+  )
 
-function generateRankHTML(idx, progressPercent = 0) {
-  const name = ranks[idx] || 'Chưa có rank'
-  const img = `<img src="img/skillgroup${idx}.png" alt="${name}">`
-  const bar = idx === 0 ? '' :
-    `<div class="xp-bar"><div class="xp-fill" style="width:${progressPercent}%"></div></div>
-     <div class="xp-text">${progressPercent.toFixed(1)}% đến ${ranks[idx+1]}</div>`
-  return `<div class="rank-display">${img}${name}</div>${bar}`
+  const hex = colorMap[activeColorClass] || '#1F4591'
+  const contrast = getContrastYIQ(hex)
+
+  btn.style.color = contrast
+  svg.style.filter = contrast === 'white'
+    ? 'brightness(0) invert(1)'
+    : 'brightness(0) invert(0)'
 }
 
-export function getTitleFromScores(scores, mode) {
-  if (!scores.length) return generateRankHTML(0)
+function resetColors() {
+  clickarea.className = 'clickarea'
+}
 
-  const { average, count } = computeScore(scores, mode)
-  let idx = 0
-  for (let i = thresholds.length - 1; i >= 0; i--) {
-    if (average >= thresholds[i].avg && count >= thresholds[i].count) {
-      idx = i + 1
-      break
-    }
+function updateText(msg, noteMsg = '') {
+  message.textContent = msg
+  note.textContent = noteMsg
+}
+
+function getBestScore() {
+  const mode = modeSelect.value
+  return localStorage.getItem(`best_${mode}`) || '--'
+}
+
+function getScores(mode) {
+  return JSON.parse(localStorage.getItem(`scores_${mode}`)) || []
+}
+
+function updateScores(newScore) {
+  const mode = modeSelect.value
+  let list = getScores(mode)
+  list.push(newScore)
+  localStorage.setItem(`scores_${mode}`, JSON.stringify(list))
+
+  const best = Math.min(...list)
+  localStorage.setItem(`best_${mode}`, best)
+  bestScoreSpan.textContent = `Best: ${best} ms`
+
+  const title = getTitleFromScores(list, mode)
+  currentTitle.innerHTML = title
+}
+
+function startWaitingPhase() {
+  gameState = 'waiting'
+  resetColors()
+  clickarea.classList.add('blue')
+  updateText('Đợi màu xanh lá')
+  prepareColorSequence()
+}
+
+function prepareColorSequence() {
+  const mode = modeSelect.value
+
+  if (mode === 'easy') {
+    colorSequence = prepareEasyModeSequence()
+  } else if (mode === 'medium') {
+    colorSequence = prepareMediumModeSequence()
+  } else if (mode === 'hard') {
+    colorSequence = prepareHardModeSequence()
   }
 
-  // compute progress toward next rank
-  let progress = 0
-  if (idx < thresholds.length) {
-    const cur = thresholds[idx - 1] || { avg: 0, count: 1 }
-    const next = thresholds[idx]
-    const avgPart = Math.min((average - cur.avg) / (next.avg - cur.avg), 1)
-    const countPart = Math.min((count - cur.count) / (next.count - cur.count), 1)
-    progress = (avgPart + countPart) / 2 * 100
+  gameState = 'color'
+  runColorSequence(0)
+}
+
+function runColorSequence(index) {
+  if (gameState !== 'color' || index >= colorSequence.length) return
+
+  const nextColor = colorSequence[index].color
+
+  if (nextColor === 'green' && modeSelect.value === 'hard') {
+    currentColor = nextColor
+    showGreenCircle()
+    gameState = 'color'
+    return
+  }
+
+  if (nextColor === 'green') {
+    finishTime = new Date()
+    updateText('Click')
   } else {
-    progress = 100
+    updateText('Đợi màu xanh lá')
   }
 
-  return generateRankHTML(idx, progress)
+  resetColors()
+  currentColor = nextColor
+  clickarea.classList.add(currentColor)
+
+  colorTimeout = setTimeout(() => runColorSequence(index + 1), colorSequence[index].delay)
 }
+
+function showGreenCircle() {
+  const size = Math.floor(Math.random() * 100) + 80
+  const x = Math.floor(Math.random() * (window.innerWidth - size))
+  const y = Math.floor(Math.random() * (window.innerHeight - size))
+
+  greenCircle.style.width = `${size}px`
+  greenCircle.style.height = `${size}px`
+  greenCircle.style.left = `${x}px`
+  greenCircle.style.top = `${y}px`
+  greenCircle.style.display = 'block'
+  greenCircle.style.position = 'absolute'
+
+  resetColors()
+  clickarea.classList.add(currentColorBeforeGreen)
+  updateText('')
+  finishTime = new Date()
+
+  greenCircle.onclick = () => {
+    greenCircle.style.display = 'none'
+    gameState = 'result'
+    resetColors()
+    clickarea.classList.add('blue')
+    const reactionTime = new Date() - finishTime
+    updateText(`${reactionTime}ms`, 'Click để tiếp tục')
+    updateScores(reactionTime)
+  }
+}
+
+function handleClick(e) {
+  e.preventDefault()
+
+  if (gameState === 'idle') {
+    startWaitingPhase()
+  } else if (gameState === 'waiting') {
+    return
+  } else if (gameState === 'color') {
+    if (currentColor === 'green') {
+      if (modeSelect.value === 'hard') {
+        gameState = 'result'
+        resetColors()
+        clickarea.classList.add('blue')
+        updateText('Sai màu!', 'Click để tiếp tục')
+        greenCircle.style.display = 'none'
+        return
+      }
+      gameState = 'result'
+      resetColors()
+      clickarea.classList.add('blue')
+      const reactionTime = new Date() - finishTime
+      updateText(`${reactionTime}ms`, 'Click để tiếp tục')
+      updateScores(reactionTime)
+    } else {
+      gameState = 'result'
+      clearTimeout(colorTimeout)
+      resetColors()
+      clickarea.classList.add('blue')
+      updateText('Sai màu!', 'Click để tiếp tục')
+    }
+  } else if (gameState === 'result') {
+    startWaitingPhase()
+  }
+}
+
+clickarea.addEventListener('click', handleClick)
+clickarea.addEventListener('touchstart', handleClick)
+
+modeSelect.addEventListener('change', () => {
+  clearTimeout(colorTimeout)
+  bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+  greenCircle.style.display = 'none'
+  showIdleState()
+})
+
+document.getElementById('showChartBtn').addEventListener('click', () => {
+  chartModal.style.display = 'flex'
+  setTimeout(() => {
+    const mode = modeSelect.value
+    renderChartForMode(mode)
+  }, 100)
+})
+
+document.getElementById('closeChartBtn').addEventListener('click', () => {
+  chartModal.style.display = 'none'
+})
+
+chartModal.addEventListener('click', (e) => {
+  if (e.target === chartModal) chartModal.style.display = 'none'
+})
+
+function showIdleState() {
+  gameState = 'idle'
+  resetColors()
+  clickarea.classList.add('blue')
+  updateText('Đang chuẩn bị', 'Click để bắt đầu')
+
+  const mode = modeSelect.value
+  const scores = getScores(mode)
+  currentTitle.innerHTML = getTitleFromScores(scores, mode)
+  applyContrastColorToChartBtn()
+}
+
+function renderChartForMode(mode) {
+  const scores = getScores(mode)
+  drawChart(mode)
+  highestTitle.innerHTML = `${getTitleFromScores(scores, mode)}`
+}
+
+document.querySelectorAll('.chart-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.getAttribute('data-mode')
+    renderChartForMode(mode)
+  })
+})
+document.getElementById('resetScoresBtn').addEventListener('click', () => {
+  const mode = modeSelect.value
+  if (confirm(`Bạn có chắc muốn xóa toàn bộ dữ liệu của chế độ "${mode}"?`)) {
+    localStorage.removeItem(`scores_${mode}`)
+    localStorage.removeItem(`best_${mode}`)
+    bestScoreSpan.textContent = `Best: -- ms`
+    currentTitle.innerHTML = getTitleFromScores([], mode)
+    renderChartForMode(mode)
+  }
+})
+
+
+showIdleState()
+bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+
+import { ranks } from './chart.js'
+
+const toggleArrow = document.getElementById('toggleRankList')
+const rankList = document.getElementById('rankList')
+let isRankListVisible = false
+
+toggleArrow.addEventListener('click', () => {
+  isRankListVisible = !isRankListVisible
+  rankList.style.display = isRankListVisible ? 'block' : 'none'
+  toggleArrow.style.transform = `translateY(-50%) rotate(${isRankListVisible ? 180 : 0}deg)`
+})
+
+function renderRankList() {
+  rankList.innerHTML = ''
+  ranks.slice(1).forEach((rank, i) => {
+    const item = document.createElement('div')
+    item.style.display = 'flex'
+    item.style.alignItems = 'center'
+    item.style.gap = '8px'
+    item.style.marginBottom = '10px'
+    item.innerHTML = `
+      <img src="img/skillgroup${i + 1}.png" alt="${rank}" style="height: 20px;">
+      <span style="font-size: 1.4vh;">${rank}</span>
+    `
+    rankList.appendChild(item)
+  })
+}
+renderRankList()
+
