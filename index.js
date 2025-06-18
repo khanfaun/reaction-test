@@ -217,7 +217,7 @@ function triggerHardModeCircles() {
   const delay = Math.floor(Math.random() * 3000) + 3000
 
   setTimeout(() => {
-    const numCircles = 6
+    const numCircles = Math.floor(Math.random() * 9) + 7  // Kết quả: 7–15
     const greenIndex = Math.floor(Math.random() * numCircles)
     const circles = []
 
