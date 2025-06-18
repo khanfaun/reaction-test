@@ -78,11 +78,11 @@ export function drawChart(mode) {
 export function getTitleFromScores(scores) {
 	if (!scores.length) return '--'
 	const latest = scores[scores.length - 1]
-	if (latest <= 100) return 'Goat'
-	if (latest <= 150) return 'Thiên tài'
-	if (latest <= 200) return 'Thần đồng'
-	if (latest <= 250) return 'Người thường'
-	if (latest <= 300) return 'NPC'
-	return 'Thần đằng'
+	if (latest <= 100) return '30000 Elo'
+	if (latest <= 150) return '15000 Elo'
+	if (latest <= 200) return '1000 Elo'
+	if (latest <= 250) return '7000 Elo'
+	if (latest <= 300) return '4000 Elo'
+	return '1000 Elo'
 }
 
