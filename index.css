@@ -175,10 +175,12 @@ body {
   align-items: center;
   font-size: 1vh;
   color: white;
-  width: 50px;
+  width: 60px;
+  text-align: center;
 }
 #rankList .rank-item img {
   height: 24px;
   width: auto;
 }
+
 
