@@ -122,21 +122,29 @@ function handleClick(e) {
     startWaitingPhase()
   } else if (gameState === 'waiting') {
     return
-  } else if (gameState === 'color') {
-    if (currentColor === 'green') {
-      gameState = 'result'
-      resetColors()
-      clickarea.classList.add('blue')
-      const reactionTime = new Date() - finishTime
-      updateText(`${reactionTime}ms`, 'Click để tiếp tục')
-      updateScores(reactionTime)
-    } else {
-      gameState = 'result'
-      clearTimeout(colorTimeout)
-      resetColors()
-      clickarea.classList.add('blue')
-      updateText('Sai màu!', 'Click để tiếp tục')
-    }
+ } else if (gameState === 'color') {
+  if (modeSelect.value === 'hard') {
+    // Nếu là chế độ khó, click vào nền là sai
+    updateText('Sai màu!', 'Click để tiếp tục')
+    document.querySelectorAll('.target-circle').forEach(c => c.remove())
+    gameState = 'result'
+    clickarea.classList.add('blue')
+  } else if (currentColor === 'green') {
+    gameState = 'result'
+    resetColors()
+    clickarea.classList.add('blue')
+    const reactionTime = new Date() - finishTime
+    updateText(`${reactionTime}ms`, 'Click để tiếp tục')
+    updateScores(reactionTime)
+  } else {
+    gameState = 'result'
+    clearTimeout(colorTimeout)
+    resetColors()
+    clickarea.classList.add('blue')
+    updateText('Sai màu!', 'Click để tiếp tục')
+  }
+}
+
   } else if (gameState === 'result') {
     startWaitingPhase()
   }
