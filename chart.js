@@ -1,7 +1,8 @@
 let chartInstance = null
 
 export function drawChart(mode) {
-	const list = JSON.parse(localStorage.getItem(`scores_${mode}`)) || []
+	const list = JSON.parse(sessionStorage.getItem(`scores_${mode}`)) || []
+
 	if (list.length === 0) return
 
 	const ctx = document.getElementById('chartCanvas')?.getContext('2d')
@@ -84,3 +85,4 @@ export function getTitleFromScores(scores) {
 	if (latest <= 300) return 'NPC'
 	return 'Thần đằng'
 }
+
