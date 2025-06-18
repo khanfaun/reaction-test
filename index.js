@@ -8,6 +8,7 @@ let finishTime = null
 let currentColor = ''
 let colorSequence = []
 let colorTimeout = null
+let hardModeTimeout = null
 
 const clickarea = document.querySelector('.clickarea')
 const message = document.querySelector('.message')
@@ -95,6 +96,7 @@ function prepareColorSequence() {
     triggerHardModeCircles()
     return
   }
+
   gameState = 'color'
   runColorSequence(0)
 }
@@ -122,6 +124,7 @@ function handleClick(e) {
     return
   } else if (gameState === 'color') {
     if (modeSelect.value === 'hard') {
+      clearTimeout(hardModeTimeout)
       updateText('Sai màu!', 'Click để tiếp tục')
       document.querySelectorAll('.target-circle').forEach(c => c.remove())
       gameState = 'result'
@@ -150,6 +153,7 @@ clickarea.addEventListener('touchstart', handleClick)
 
 modeSelect.addEventListener('change', () => {
   clearTimeout(colorTimeout)
+  clearTimeout(hardModeTimeout)
   bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
   resetColors()
   clickarea.classList.add('blue')
@@ -207,7 +211,6 @@ document.getElementById('resetScoresBtn').addEventListener('click', () => {
   }
 })
 
-// 🎯 Hard Mode: Logic tạo vòng tròn sau delay
 function triggerHardModeCircles() {
   resetColors()
   clickarea.classList.add('red')
@@ -216,8 +219,8 @@ function triggerHardModeCircles() {
 
   const delay = Math.floor(Math.random() * 3000) + 3000
 
-  setTimeout(() => {
-    const numCircles = Math.floor(Math.random() * 9) + 7  // Kết quả: 7–15
+  hardModeTimeout = setTimeout(() => {
+    const numCircles = Math.floor(Math.random() * 9) + 7
     const greenIndex = Math.floor(Math.random() * numCircles)
     const circles = []
 
