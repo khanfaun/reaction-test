@@ -164,6 +164,7 @@ export function getTitleFromScores(scores, mode) {
 // 📦 Tạo HTML chứa ảnh và tên rank
 function generateRankHTML(index) {
   const name = ranks[index]
-  const img = `<img src="img/skillgroup${index}.png" alt="${name}" style="height: 20px; vertical-align: middle; margin-right: 6px;">`
-  return index === 0 ? `${img}Chưa có rank` : `${img}${name}`
+  const img = `<img src="img/skillgroup${index}.png" alt="${name}">`
+  const label = index === 0 ? 'Chưa có rank' : name
+  return `<div class="rank-display">${img}${label}</div>`
 }
