@@ -270,4 +270,27 @@ document.getElementById('resetScoresBtn').addEventListener('click', () => {
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
 
+const allRanks = [
+  'Chưa có rank', 'Silver 1','Silver 2','Silver 3','Silver 4',
+  'Silver Elite','Silver Elite Master','Nova 1','Nova 2','Nova 3','Nova Master',
+  'Master Guardian 1','Master Guardian 2','Master Guardian Elite',
+  'Distinguished Master Guardian','Legendary Eagle','Legendary Eagle Master',
+  'Supreme Master First Class','Global Elite'
+]
+
+function renderRankList() {
+  const container = document.getElementById('rankList')
+  if (!container) return
+  container.innerHTML = ''
+
+  allRanks.forEach((name, idx) => {
+    const item = document.createElement('div')
+    item.className = 'rank-item'
+    item.innerHTML = `<img src="img/skillgroup${idx}.png" alt="${name}"><div>${name}</div>`
+    container.appendChild(item)
+  })
+}
+
+renderRankList()
+
 
