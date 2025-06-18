@@ -255,6 +255,17 @@ document.querySelectorAll('.chart-mode-btn').forEach(btn => {
     renderChartForMode(mode)
   })
 })
+document.getElementById('resetScoresBtn').addEventListener('click', () => {
+  const mode = modeSelect.value
+  if (confirm(`Bạn có chắc muốn xóa toàn bộ dữ liệu của chế độ "${mode}"?`)) {
+    localStorage.removeItem(`scores_${mode}`)
+    localStorage.removeItem(`best_${mode}`)
+    bestScoreSpan.textContent = `Best: -- ms`
+    currentTitle.innerHTML = getTitleFromScores([], mode)
+    renderChartForMode(mode)
+  }
+})
+
 
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
