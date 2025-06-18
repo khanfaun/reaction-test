@@ -35,21 +35,21 @@ function updateText(msg, noteMsg = '') {
 
 function getBestScore() {
   const mode = modeSelect.value
-  return sessionStorage.getItem(`best_${mode}`) || '--'
+  return localStorage.getItem(`best_${mode}`) || '--'
 }
 
 function getScores(mode) {
-  return JSON.parse(sessionStorage.getItem(`scores_${mode}`)) || []
+  return JSON.parse(localStorage.getItem(`scores_${mode}`)) || []
 }
 
 function updateScores(newScore) {
   const mode = modeSelect.value
   let list = getScores(mode)
   list.push(newScore)
-  sessionStorage.setItem(`scores_${mode}`, JSON.stringify(list))
+  localStorage.setItem(`scores_${mode}`, JSON.stringify(list))
 
   const best = Math.min(...list)
-  sessionStorage.setItem(`best_${mode}`, best)
+  localStorage.setItem(`best_${mode}`, best)
   bestScoreSpan.textContent = `Best: ${best} ms`
 
   const title = getTitleFromScores(list)
@@ -103,7 +103,6 @@ function runColorSequence(index) {
   currentColor = nextColor
   clickarea.classList.add(currentColor)
 
-  
   colorTimeout = setTimeout(() => runColorSequence(index + 1), colorSequence[index].delay)
 }
 
