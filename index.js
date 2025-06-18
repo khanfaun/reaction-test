@@ -103,7 +103,7 @@ function runColorSequence(index) {
   currentColor = nextColor
   clickarea.classList.add(currentColor)
 
-  updateText('Đợi màu xanh lá')
+  
   colorTimeout = setTimeout(() => runColorSequence(index + 1), colorSequence[index].delay)
 }
 
