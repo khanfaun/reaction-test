@@ -34,39 +34,17 @@ export function drawChart(mode) {
     options: {
       scales: {
         x: {
-          title: {
-            display: true,
-            text: 'Tốc độ phản xạ (ms)',
-            color: '#ffffff'
-          },
-          ticks: {
-            color: '#ffffff',
-            callback: value => labels[value],
-            font: { family: 'Montserrat', size: 12 }
-          },
-          grid: {
-            color: 'rgba(255,255,255,0.1)'
-          }
+          title: { display: true, text: 'Tốc độ phản xạ (ms)', color: '#fff' },
+          ticks: { color: '#fff', callback: v => labels[v], font: { family: 'Montserrat', size: 12 } },
+          grid: { color: 'rgba(255,255,255,0.1)' }
         },
         y: {
-          title: {
-            display: true,
-            text: 'Số lần đạt được',
-            color: '#ffffff'
-          },
-          ticks: {
-            color: '#ffffff',
-            stepSize: 1,
-            font: { family: 'Montserrat', size: 12 }
-          },
-          grid: {
-            color: 'rgba(255,255,255,0.1)'
-          }
+          title: { display: true, text: 'Số lần đạt được', color: '#fff' },
+          ticks: { color: '#fff', stepSize: 1, font: { family: 'Montserrat', size: 12 } },
+          grid: { color: 'rgba(255,255,255,0.1)' }
         }
       },
-      plugins: {
-        legend: { display: false }
-      }
+      plugins: { legend: { display: false } }
     }
   }
 
@@ -74,97 +52,79 @@ export function drawChart(mode) {
   chartInstance = new Chart(ctx, config)
 }
 
-// 🎯 Tính điểm trung bình phản xạ tốt (≤ 300ms) với trọng số chế độ
+// 🎯 Tính điểm trung bình phản xạ tốt (≤ 300ms)
 function computeScore(scores, mode) {
-  const modeWeight = {
-    easy: 0.7,
-    medium: 1.0,
-    hard: 1.3
-  }
-
-  const weight = modeWeight[mode] || 1.0
-
+  const weight = { easy: 0.7, medium: 1.0, hard: 1.3 }[mode] || 1.0
   const valid = scores.filter(t => t <= 300)
-  const validScores = valid.map(t => {
-    const point = (300 - t) / 150
-    return Math.max(0, Math.min(1, point)) * weight
-  })
-
-  const total = validScores.reduce((sum, val) => sum + val, 0)
+  const validScores = valid.map(t => ((300 - t) / 150 * weight).toFixed(3)).map(Number)
+  const total = validScores.reduce((s, v) => s + v, 0)
   const average = validScores.length ? total / validScores.length : 0
-
-  return {
-    total,
-    average,
-    count: validScores.length
-  }
+  return { average, count: validScores.length }
 }
 
 const ranks = [
   'Chưa có rank',
-  'Silver 1',
-  'Silver 2',
-  'Silver 3',
-  'Silver 4',
-  'Silver Elite',
-  'Silver Elite Master',
-  'Nova 1',
-  'Nova 2',
-  'Nova 3',
-  'Nova Master',
-  'Master Guardian 1',
-  'Master Guardian 2',
-  'Master Guardian Elite',
-  'Distinguished Master Guardian',
-  'Legendary Eagle',
-  'Legendary Eagle Master',
-  'Supreme Master First Class',
-  'Global Elite'
+  'Silver 1','Silver 2','Silver 3','Silver 4',
+  'Silver Elite','Silver Elite Master','Nova 1',
+  'Nova 2','Nova 3','Nova Master',
+  'Master Guardian 1','Master Guardian 2','Master Guardian Elite',
+  'Distinguished Master Guardian','Legendary Eagle',
+  'Legendary Eagle Master','Supreme Master First Class','Global Elite'
 ]
 
-// 🏆 Trả về rank dựa trên averageScore + validCount
+const thresholds = [
+  { avg: 0.00, count: 1 },
+  { avg: 0.05, count: 2 },
+  { avg: 0.08, count: 3 },
+  { avg: 0.10, count: 4 },
+  { avg: 0.12, count: 5 },
+  { avg: 0.15, count: 6 },
+  { avg: 0.18, count: 7 },
+  { avg: 0.21, count: 8 },
+  { avg: 0.24, count: 9 },
+  { avg: 0.27, count: 10 },
+  { avg: 0.30, count: 11 },
+  { avg: 0.35, count: 12 },
+  { avg: 0.40, count: 13 },
+  { avg: 0.45, count: 14 },
+  { avg: 0.50, count: 15 },
+  { avg: 0.55, count: 16 },
+  { avg: 0.65, count: 17 },
+  { avg: 0.75, count: 18 }
+]
+
+function generateRankHTML(idx, progressPercent = 0) {
+  const name = ranks[idx] || 'Chưa có rank'
+  const img = `<img src="img/skillgroup${idx}.png" alt="${name}">`
+  const bar = idx === 0 ? '' :
+    `<div class="xp-bar"><div class="xp-fill" style="width:${progressPercent}%"></div></div>
+     <div class="xp-text">${progressPercent.toFixed(1)}% đến ${ranks[idx+1]}</div>`
+  return `<div class="rank-display">${img}${name}</div>${bar}`
+}
+
 export function getTitleFromScores(scores, mode) {
-  if (!scores.length) return generateRankHTML(0) // skillgroup0.png
+  if (!scores.length) return generateRankHTML(0)
 
   const { average, count } = computeScore(scores, mode)
-
-  const thresholds = [
-    { minAvg: 0.00, minCount: 1 },
-    { minAvg: 0.05, minCount: 2 },
-    { minAvg: 0.08, minCount: 3 },
-    { minAvg: 0.10, minCount: 4 },
-    { minAvg: 0.12, minCount: 5 },
-    { minAvg: 0.15, minCount: 6 },
-    { minAvg: 0.18, minCount: 7 },
-    { minAvg: 0.21, minCount: 8 },
-    { minAvg: 0.24, minCount: 9 },
-    { minAvg: 0.27, minCount: 10 },
-    { minAvg: 0.30, minCount: 11 },
-    { minAvg: 0.35, minCount: 12 },
-    { minAvg: 0.40, minCount: 13 },
-    { minAvg: 0.45, minCount: 14 },
-    { minAvg: 0.50, minCount: 15 },
-    { minAvg: 0.55, minCount: 16 },
-    { minAvg: 0.65, minCount: 17 },
-    { minAvg: 0.75, minCount: 18 }
-  ]
-
-  let rankIndex = 0
+  let idx = 0
   for (let i = thresholds.length - 1; i >= 0; i--) {
-    const { minAvg, minCount } = thresholds[i]
-    if (average >= minAvg && count >= minCount) {
-      rankIndex = i + 1
+    if (average >= thresholds[i].avg && count >= thresholds[i].count) {
+      idx = i + 1
       break
     }
   }
 
-  return generateRankHTML(rankIndex)
-}
+  // compute progress toward next rank
+  let progress = 0
+  if (idx < thresholds.length) {
+    const cur = thresholds[idx - 1] || { avg: 0, count: 1 }
+    const next = thresholds[idx]
+    const avgPart = Math.min((average - cur.avg) / (next.avg - cur.avg), 1)
+    const countPart = Math.min((count - cur.count) / (next.count - cur.count), 1)
+    progress = (avgPart + countPart) / 2 * 100
+  } else {
+    progress = 100
+  }
 
-// 📦 Tạo HTML chứa ảnh và tên rank
-function generateRankHTML(index) {
-  const name = ranks[index]
-  const img = `<img src="img/skillgroup${index}.png" alt="${name}">`
-  const label = index === 0 ? 'Chưa có rank' : name
-  return `<div class="rank-display">${img}${label}</div>`
+  return generateRankHTML(idx, progress)
 }
