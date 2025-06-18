@@ -53,7 +53,7 @@ function updateScores(newScore) {
   bestScoreSpan.textContent = `Best: ${best} ms`
 
   const title = getTitleFromScores(list)
-  currentTitle.textContent = `Danh hiệu: ${title}`
+  currentTitle.textContent = `Xếp hạng: ${title}`
 }
 
 function startWaitingPhase() {
