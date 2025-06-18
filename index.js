@@ -246,7 +246,7 @@ function showIdleState() {
 function renderChartForMode(mode) {
   const scores = getScores(mode)
   drawChart(mode)
-  highestTitle.innerHTML = `Xếp hạng: ${getTitleFromScores(scores, mode)}`
+  highestTitle.innerHTML = `${getTitleFromScores(scores, mode)}`
 }
 
 document.querySelectorAll('.chart-mode-btn').forEach(btn => {
