@@ -27,8 +27,6 @@ const colorMap = {
   red: '#cc0033'
 }
 
-// Các hàm tiện ích
-
 function getContrastYIQ(hexcolor) {
   const r = parseInt(hexcolor.substr(1, 2), 16)
   const g = parseInt(hexcolor.substr(3, 2), 16)
@@ -122,35 +120,30 @@ function handleClick(e) {
     startWaitingPhase()
   } else if (gameState === 'waiting') {
     return
- } else if (gameState === 'color') {
-  if (modeSelect.value === 'hard') {
-    // Nếu là chế độ khó, click vào nền là sai
-    updateText('Sai màu!', 'Click để tiếp tục')
-    document.querySelectorAll('.target-circle').forEach(c => c.remove())
-    gameState = 'result'
-    clickarea.classList.add('blue')
-  } else if (currentColor === 'green') {
-    gameState = 'result'
-    resetColors()
-    clickarea.classList.add('blue')
-    const reactionTime = new Date() - finishTime
-    updateText(`${reactionTime}ms`, 'Click để tiếp tục')
-    updateScores(reactionTime)
-  } else {
-    gameState = 'result'
-    clearTimeout(colorTimeout)
-    resetColors()
-    clickarea.classList.add('blue')
-    updateText('Sai màu!', 'Click để tiếp tục')
-  }
-}
-
+  } else if (gameState === 'color') {
+    if (modeSelect.value === 'hard') {
+      updateText('Sai màu!', 'Click để tiếp tục')
+      document.querySelectorAll('.target-circle').forEach(c => c.remove())
+      gameState = 'result'
+      clickarea.classList.add('blue')
+    } else if (currentColor === 'green') {
+      gameState = 'result'
+      resetColors()
+      clickarea.classList.add('blue')
+      const reactionTime = new Date() - finishTime
+      updateText(`${reactionTime}ms`, 'Click để tiếp tục')
+      updateScores(reactionTime)
+    } else {
+      gameState = 'result'
+      clearTimeout(colorTimeout)
+      resetColors()
+      clickarea.classList.add('blue')
+      updateText('Sai màu!', 'Click để tiếp tục')
+    }
   } else if (gameState === 'result') {
     startWaitingPhase()
   }
 }
-
-// Event listeners
 
 clickarea.addEventListener('click', handleClick)
 clickarea.addEventListener('touchstart', handleClick)
@@ -165,14 +158,17 @@ modeSelect.addEventListener('change', () => {
 
 document.getElementById('showChartBtn').addEventListener('click', () => {
   chartModal.style.display = 'flex'
-  setTimeout(() => renderChartForMode(modeSelect.value), 100)
+  setTimeout(() => {
+    const mode = modeSelect.value
+    renderChartForMode(mode)
+  }, 100)
 })
 
 document.getElementById('closeChartBtn').addEventListener('click', () => {
   chartModal.style.display = 'none'
 })
 
-chartModal.addEventListener('click', e => {
+chartModal.addEventListener('click', (e) => {
   if (e.target === chartModal) chartModal.style.display = 'none'
 })
 
@@ -181,32 +177,37 @@ function showIdleState() {
   resetColors()
   clickarea.classList.add('blue')
   updateText('Đang chuẩn bị', 'Click để bắt đầu')
-  currentTitle.innerHTML = getTitleFromScores(getScores(modeSelect.value), modeSelect.value)
+  const mode = modeSelect.value
+  const scores = getScores(mode)
+  currentTitle.innerHTML = getTitleFromScores(scores, mode)
   applyContrastColorToChartBtn()
 }
 
 function renderChartForMode(mode) {
+  const scores = getScores(mode)
   drawChart(mode)
-  highestTitle.innerHTML = getTitleFromScores(getScores(mode), mode)
+  highestTitle.innerHTML = `${getTitleFromScores(scores, mode)}`
 }
 
-document.querySelectorAll('.chart-mode-btn').forEach(btn =>
-  btn.addEventListener('click', () => renderChartForMode(btn.dataset.mode))
-)
+document.querySelectorAll('.chart-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.getAttribute('data-mode')
+    renderChartForMode(mode)
+  })
+})
 
 document.getElementById('resetScoresBtn').addEventListener('click', () => {
   const mode = modeSelect.value
-  if (confirm(`Bạn có chắc muốn xóa dữ liệu của chế độ "${mode}"?`)) {
+  if (confirm(`Bạn có chắc muốn xóa toàn bộ dữ liệu của chế độ "${mode}"?`)) {
     localStorage.removeItem(`scores_${mode}`)
     localStorage.removeItem(`best_${mode}`)
-    bestScoreSpan.textContent = 'Best: -- ms'
+    bestScoreSpan.textContent = `Best: -- ms`
     currentTitle.innerHTML = getTitleFromScores([], mode)
     renderChartForMode(mode)
   }
 })
 
-// 🎯 Hard Mode: logic vòng tròn với delay trên nền đỏ
-
+// 🎯 Hard Mode: Logic tạo vòng tròn sau delay
 function triggerHardModeCircles() {
   resetColors()
   clickarea.classList.add('red')
@@ -270,8 +271,7 @@ function overlapsExisting(x, y, size, existing) {
   return existing.some(c => {
     const dx = c.x - x
     const dy = c.y - y
-    const distance = Math.hypot(dx, dy)
-    // Kiểm tra nếu trung tâm cách nhau < bán kính tổng => coi như chồng
+    const distance = Math.sqrt(dx * dx + dy * dy)
     return distance < (c.size + size) / 2
   })
 }
@@ -281,6 +281,5 @@ function getRandomDistractorColor() {
   return distractors[Math.floor(Math.random() * distractors.length)]
 }
 
-// Khởi tạo trạng thái ban đầu
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
