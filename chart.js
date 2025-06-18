@@ -55,7 +55,7 @@ export function drawChart(mode) {
 // 🎯 Tính điểm trung bình phản xạ tốt với maxTime riêng cho từng chế độ
 function computeScore(scores, mode) {
   const weight = { easy: 0.7, medium: 1.0, hard: 1.3 }[mode] || 1.0
-  const maxTime = { easy: 300, medium: 300, hard: 350 }[mode] || 300
+  const maxTime = { easy: 300, medium: 400, hard: 500 }[mode] || 300
 
   const valid = scores.filter(t => t <= maxTime)
   const validScores = valid.map(t => ((300 - t) / 150 * weight).toFixed(3)).map(Number)
