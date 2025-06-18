@@ -95,9 +95,16 @@ function startWaitingPhase() {
 
 function prepareColorSequence() {
   const mode = modeSelect.value
-  if (mode === 'easy') colorSequence = prepareEasyModeSequence()
-  else if (mode === 'medium') colorSequence = prepareMediumModeSequence()
-  else if (mode === 'hard') colorSequence = prepareHardModeSequence()
+  if (mode === 'easy') {
+    colorSequence = prepareEasyModeSequence()
+  } else if (mode === 'medium') {
+    colorSequence = prepareMediumModeSequence()
+  } else if (mode === 'hard') {
+    gameState = 'color'
+    triggerHardModeCircles()
+    return
+  }
+
   gameState = 'color'
   runColorSequence(0)
 }
@@ -105,13 +112,6 @@ function prepareColorSequence() {
 function runColorSequence(index) {
   if (gameState !== 'color' || index >= colorSequence.length) return
   const nextColor = colorSequence[index].color
-  if (nextColor === 'green' && modeSelect.value === 'hard') {
-    currentColor = nextColor
-    showGreenCircle()
-    gameState = 'color'
-    return
-  }
-
   if (nextColor === 'green') {
     finishTime = new Date()
     updateText('Click')
@@ -122,35 +122,7 @@ function runColorSequence(index) {
   resetColors()
   currentColor = nextColor
   clickarea.classList.add(currentColor)
-
   colorTimeout = setTimeout(() => runColorSequence(index + 1), colorSequence[index].delay)
-}
-
-function showGreenCircle() {
-  const size = Math.floor(Math.random() * 100) + 80
-  const x = Math.floor(Math.random() * (window.innerWidth - size))
-  const y = Math.floor(Math.random() * (window.innerHeight - size))
-  greenCircle.style.width = `${size}px`
-  greenCircle.style.height = `${size}px`
-  greenCircle.style.left = `${x}px`
-  greenCircle.style.top = `${y}px`
-  greenCircle.style.display = 'block'
-  greenCircle.style.position = 'absolute'
-
-  resetColors()
-  clickarea.classList.add(currentColorBeforeGreen)
-  updateText('')
-  finishTime = new Date()
-
-  greenCircle.onclick = () => {
-    greenCircle.style.display = 'none'
-    gameState = 'result'
-    resetColors()
-    clickarea.classList.add('blue')
-    const reactionTime = new Date() - finishTime
-    updateText(`${reactionTime}ms`, 'Click để tiếp tục')
-    updateScores(reactionTime)
-  }
 }
 
 function handleClick(e) {
@@ -161,14 +133,6 @@ function handleClick(e) {
     return
   } else if (gameState === 'color') {
     if (currentColor === 'green') {
-      if (modeSelect.value === 'hard') {
-        gameState = 'result'
-        resetColors()
-        clickarea.classList.add('blue')
-        updateText('Sai màu!', 'Click để tiếp tục')
-        greenCircle.style.display = 'none'
-        return
-      }
       gameState = 'result'
       resetColors()
       clickarea.classList.add('blue')
@@ -248,28 +212,74 @@ document.getElementById('resetScoresBtn').addEventListener('click', () => {
   }
 })
 
-// ✅ Thêm danh sách rank bên trái
-function renderRankList() {
-  const container = document.getElementById('rankList')
-  if (!container) return
-  container.innerHTML = ''
+// 🎯 Hard Mode: Vòng tròn gây nhiễu
+function triggerHardModeCircles() {
+  resetColors()
+  clickarea.classList.add('red')
+  document.querySelectorAll('.target-circle').forEach(c => c.remove())
 
-  const allRanks = [
-    'Chưa có rank', 'Silver 1','Silver 2','Silver 3','Silver 4',
-    'Silver Elite','Silver Elite Master','Nova 1','Nova 2','Nova 3','Nova Master',
-    'Master Guardian 1','Master Guardian 2','Master Guardian Elite',
-    'Distinguished Master Guardian','Legendary Eagle','Legendary Eagle Master',
-    'Supreme Master First Class','Global Elite'
-  ]
+  const numCircles = 6
+  const greenIndex = Math.floor(Math.random() * numCircles)
+  const circles = []
 
-  allRanks.forEach((name, idx) => {
-    const item = document.createElement('div')
-    item.className = 'rank-item'
-    item.innerHTML = `<img src="img/skillgroup${idx}.png" alt="${name}"><span>${name}</span>`
-    container.appendChild(item)
+  for (let i = 0; i < numCircles; i++) {
+    const circle = document.createElement('div')
+    circle.classList.add('target-circle')
+    const size = Math.floor(Math.random() * 60) + 40
+    const color = i === greenIndex ? 'green' : getRandomDistractorColor()
+
+    circle.style.width = `${size}px`
+    circle.style.height = `${size}px`
+    circle.style.backgroundColor = color
+    circle.style.position = 'absolute'
+
+    let x, y, attempts = 0
+    do {
+      x = Math.random() * (window.innerWidth - size)
+      y = Math.random() * (window.innerHeight - size)
+      attempts++
+    } while (overlapsExisting(x, y, size, circles) && attempts < 30)
+
+    circle.style.left = `${x}px`
+    circle.style.top = `${y}px`
+
+    if (i === greenIndex) {
+      finishTime = new Date()
+      circle.onclick = () => {
+        const reactionTime = new Date() - finishTime
+        updateText(`${reactionTime}ms`, 'Click để tiếp tục')
+        updateScores(reactionTime)
+        document.querySelectorAll('.target-circle').forEach(c => c.remove())
+        gameState = 'result'
+        clickarea.classList.add('blue')
+      }
+    } else {
+      circle.onclick = () => {
+        updateText('Sai vòng tròn!', 'Click để tiếp tục')
+        document.querySelectorAll('.target-circle').forEach(c => c.remove())
+        gameState = 'result'
+        clickarea.classList.add('blue')
+      }
+    }
+
+    document.body.appendChild(circle)
+    circles.push({ x, y, size })
+  }
+}
+
+function overlapsExisting(x, y, size, existing) {
+  return existing.some(c => {
+    const dx = c.x - x
+    const dy = c.y - y
+    const distance = Math.sqrt(dx * dx + dy * dy)
+    return distance < (c.size + size) / 2
   })
 }
 
-renderRankList()
+function getRandomDistractorColor() {
+  const distractors = ['#ff9933', '#33ccff', '#cc66ff', '#ffff66', '#ff66b2']
+  return distractors[Math.floor(Math.random() * distractors.length)]
+}
+
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
