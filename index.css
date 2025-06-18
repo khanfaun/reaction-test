@@ -169,17 +169,9 @@ body {
   color: white;
   text-align: center;
 }
-#rankList .rank-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 1.2vh;
-  color: white;
+.target-circle {
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 9999;
 }
-#rankList .rank-item img {
-  height: 20px;
-  width: auto;
-}
-
-
 
