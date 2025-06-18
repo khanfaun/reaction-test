@@ -6,47 +6,6 @@
   <link rel="stylesheet" href="index.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    .mode-selector {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      color: white;
-      font-size: 1.8vh;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    #currentTitle {
-      position: absolute;
-      top: 20px;
-      left: 30px;
-      color: white;
-      font-size: 1.8vh;
-    }
-
-    .mode-selector select,
-    .mode-selector span,
-    .mode-selector button {
-      font-size: 1.8vh;
-    }
-
-    #showChartBtn img {
-      width: 20px;
-      height: 20px;
-      vertical-align: middle;
-      filter: brightness(0) invert(1);
-    }
-
-    #showChartBtn {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-    }
-  </style>
 </head>
 <body>
   <span id="currentTitle">Xếp hạng: --</span>
@@ -59,9 +18,9 @@
       <option value="hard">Khó</option>
     </select>
     <span id="bestScore">Best: -- ms</span>
-    <button id="showChartBtn" class="flex items-center gap-2 text-white">
-      <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24">
-        <path fill-rule="evenodd" d="M8 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1h2a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2Zm6 1h-4v2H9a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2h-1V4Zm-6 8a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1 3a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" clip-rule="evenodd"/>
+    <button id="showChartBtn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="white" viewBox="0 0 24 24">
+        <path d="M8 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1h2a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2Zm6 1h-4v2H9a1 1 0 0 0 0 2h6a1 1 0 1 0 0-2h-1V4Zm-6 8a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Zm1 3a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H9Z" />
       </svg>
     </button>
   </div>
@@ -73,67 +32,53 @@
     </div>
   </div>
 
-  <!-- Popup biểu đồ -->
-  <div id="chartModal" style="
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;">
-    <div style="
-      background: #1F4591;
-      padding: 20px;
-      border-radius: 12px;
-      position: relative;
-      text-align: center;">
-      
-      <button id="closeChartBtn" style="
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 20px;
-        background: transparent;
-        border: none;
-        color: white;
-        cursor: pointer;">✖</button>
+  <!-- Popup -->
+  <div id="chartModal">
+    <button id="toggleRankListBtn">❯</button>
 
-      <div id="highestTitle" style="color: white; font-size: 2.2vh; margin-bottom: 10px;">
-        🏆 Xếp hạng: --
+    <div id="rankListPanel">
+      <h3>Lộ trình rank</h3>
+      <div id="rankListContent"></div>
+    </div>
+
+    <div class="chart-content">
+      <button id="closeChartBtn">✖</button>
+      <div id="highestTitle">🏆 Xếp hạng: --</div>
+      <div class="chart-subtext">Hệ thống không lỗi. Chỉ có bạn lỗi. Hãy phản xạ nhanh hơn, nhiều lần hơn.</div>
+
+      <div id="chartModeButtons">
+        <button class="chart-mode-btn" data-mode="easy">Dễ</button>
+        <button class="chart-mode-btn" data-mode="medium">Trung bình</button>
+        <button class="chart-mode-btn" data-mode="hard">Khó</button>
       </div>
 
-      <div style="color: #ccc; font-size: 1vh;">
-        Hệ thống không lỗi. Chỉ có bạn lỗi. Hãy phản xạ nhanh hơn, nhiều lần hơn.
-      </div>
+      <canvas id="chartCanvas" width="500" height="250"></canvas>
 
-     
-      <canvas id="chartCanvas" width="500" height="250" style="margin-top: 20px;"></canvas>
-<!-- Nhóm nút chế độ + reset chung hàng, căn giữa -->
-<div id="chartModeButtons" style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
-  <button class="chart-mode-btn" data-mode="easy">Dễ</button>
-  <button class="chart-mode-btn" data-mode="medium">Trung bình</button>
-  <button class="chart-mode-btn" data-mode="hard">Khó</button>
-
-  <!-- Nút reset icon -->
-  <button id="resetScoresBtn" style="
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-  " title="Xóa dữ liệu">
-    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" fill="white">
-      <path d="M12 6V4L8 8l4 4V9c2.76 0 5 2.24 5 5 0 1.29-.49 2.47-1.29 3.36l1.42 1.42C18.4 17.37 19 15.76 19 14c0-3.87-3.13-7-7-7zm-5.71.64L4.86 8.07C3.6 9.63 3 11.24 3 13c0 3.87 3.13 7 7 7v2l4-4-4-4v2c-2.76 0-5-2.24-5-5 0-1.29.49-2.47 1.29-3.36z"/>
-    </svg>
-  </button>
-</div>
-
-
+      <button id="resetScoresBtn" title="Xóa dữ liệu">
+        <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24">
+          <path d="M12 6V4L8 8l4 4V9c2.76 0 5 2.24 5 5 0 1.29-.49 2.47-1.29 3.36l1.42 1.42C18.4 17.37 19 15.76 19 14c0-3.87-3.13-7-7-7zm-5.71.64L4.86 8.07C3.6 9.63 3 11.24 3 13c0 3.87 3.13 7 7 7v2l4-4-4-4v2c-2.76 0-5-2.24-5-5 0-1.29.49-2.47 1.29-3.36z"/>
+        </svg>
+      </button>
     </div>
   </div>
 
   <script type="module" src="index.js" defer></script>
+  <script>
+    document.getElementById('toggleRankListBtn').addEventListener('click', () => {
+      const panel = document.getElementById('rankListPanel')
+      const toggleBtn = document.getElementById('toggleRankListBtn')
+      panel.classList.toggle('open')
+      toggleBtn.textContent = panel.classList.contains('open') ? '❮' : '❯'
+    })
+
+    const rankNames = [
+      'Chưa có rank','Silver 1','Silver 2','Silver 3','Silver 4','Silver Elite','Silver Elite Master',
+      'Nova 1','Nova 2','Nova 3','Nova Master','Master Guardian 1','Master Guardian 2','Master Guardian Elite',
+      'Distinguished Master Guardian','Legendary Eagle','Legendary Eagle Master','Supreme Master First Class','Global Elite'
+    ]
+    document.getElementById('rankListContent').innerHTML = rankNames.map((name, i) =>
+      `<div><img src="img/skillgroup${i}.png" alt=""> ${name}</div>`
+    ).join('')
+  </script>
 </body>
 </html>
