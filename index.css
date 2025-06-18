@@ -1,33 +1,33 @@
 body {
-  background-color: #0B132B;
-  margin: 0;
   font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  background-color: #0f1e3d;
+  color: white;
 }
 
-.top-bar {
+.mode-selector {
   position: absolute;
   top: 20px;
   right: 30px;
   display: flex;
+  gap: 12px;
   align-items: center;
-  gap: 14px;
-  color: white;
+  flex-wrap: wrap;
   font-size: 1.8vh;
 }
 
-.top-bar button {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
+#currentTitle {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  font-size: 1.8vh;
 }
 
-.top-bar svg {
-  width: 28px;
-  height: 28px;
-  fill: currentColor;
-  stroke: none;
+#showChartBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
 }
 
 .container {
@@ -38,32 +38,20 @@ body {
 }
 
 .clickarea {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #1F4591;
-  color: white;
+  background-color: #243b8a;
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.message {
-  font-size: 6vh;
-  margin: 10px 0;
   user-select: none;
-  text-align: center;
 }
 
-.note {
-  font-size: 2.5vh;
-  user-select: none;
-  text-align: center;
+.message, .note {
+  margin: 0.5em 0;
+  font-size: 2vh;
 }
 
-.popup {
+#chartModal {
   display: none;
   position: fixed;
   inset: 0;
@@ -73,101 +61,94 @@ body {
   z-index: 1000;
 }
 
-.popup-content {
+.chart-content {
+  position: relative;
   background: #1F4591;
   padding: 20px;
   border-radius: 12px;
   text-align: center;
-  position: relative;
-}
-.red {
-  background-color: #4d120e;
+  min-width: 540px;
 }
 
-.green {
-  background-color: green;
-}
-
-.yellow {
-  background-color: #e0c000; /* vàng sẫm hơn */
-}
-
-.pink {
-  background-color: #d87093; /* hồng sẫm */
-}
-
-.cyan {
-  background-color: #20b2aa; /* xanh ngọc sẫm */
-}
-
-.orange {
-  background-color: orange;
-}
-
-.purple {
-  background-color: purple;
-}
-
-.blue {
-  background-color: #1F4591; /* màu mặc định */
-}
-.chart-mode-btn {
-  background-color: #ffffff22;
-  color: white;
-  border: 1px solid white;
-  border-radius: 6px;
-  padding: 6px 12px;
-  margin: 0 4px;
-  cursor: pointer;
-  font-size: 1.6vh;
-}
-
-.chart-mode-btn:hover {
-  background-color: #ffffff44;
-}
-.green-circle {
-  position: absolute;
-  border-radius: 50%;
-  background-color: green;
-  z-index: 9999;
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-#currentTitle {
-  font-size: 2.2vh; /* tăng từ 1.8vh */
-}
-#currentTitle img {
-  height: 24px;    /* tăng từ 20px */
-}
-.rank-display {
+#chartModeButtons {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 2.2vh;
-  font-weight: bold;
-}
-.rank-display img {
-  height: 24px;
+  gap: 12px;
+  margin-top: 30px;
 }
 
-.xp-bar {
-  width: 100%;
-  height: 3px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 3px;
-  margin: 4px 0 2px;
-}
-.xp-fill {
-  height: 100%;
-  background: #4FC3F7;
-  border-radius: 3px;
-}
-.xp-text {
-  font-size: 1.2vh;
+.chart-mode-btn {
+  padding: 4px 10px;
+  font-size: 1.5vh;
+  cursor: pointer;
+  border-radius: 4px;
+  background: #3561c9;
   color: white;
-  text-align: center;
+  border: none;
 }
 
+#highestTitle {
+  font-size: 2.2vh;
+  margin-bottom: 10px;
+}
 
+.chart-subtext {
+  color: #ccc;
+  font-size: 1vh;
+}
+
+#resetScoresBtn {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+#resetScoresBtn svg {
+  fill: white;
+}
+
+#toggleRankListBtn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 1200;
+}
+
+#rankListPanel {
+  position: absolute;
+  top: 0;
+  left: -220px;
+  width: 200px;
+  height: 100%;
+  background: #244a9b;
+  padding: 12px;
+  overflow-y: auto;
+  transition: left 0.3s ease;
+  z-index: 1100;
+  font-size: 1.4vh;
+  line-height: 1.6;
+}
+
+#rankListPanel.open {
+  left: 0;
+}
+
+#rankListPanel h3 {
+  color: white;
+  font-size: 1.5vh;
+  margin: 0 0 8px;
+}
+
+#rankListPanel img {
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
