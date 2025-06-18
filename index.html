@@ -6,47 +6,6 @@
   <link rel="stylesheet" href="index.css" />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    .mode-selector {
-      position: absolute;
-      top: 20px;
-      right: 30px;
-      color: white;
-      font-size: 1.8vh;
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    #currentTitle {
-      position: absolute;
-      top: 20px;
-      left: 30px;
-      color: white;
-      font-size: 1.8vh;
-    }
-
-    .mode-selector select,
-    .mode-selector span,
-    .mode-selector button {
-      font-size: 1.8vh;
-    }
-
-    #showChartBtn img {
-      width: 20px;
-      height: 20px;
-      vertical-align: middle;
-      filter: brightness(0) invert(1);
-    }
-
-    #showChartBtn {
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-    }
-  </style>
 </head>
 <body>
   <span id="currentTitle">Xếp hạng: --</span>
@@ -74,30 +33,10 @@
   </div>
 
   <!-- Popup biểu đồ -->
-  <div id="chartModal" style="
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;">
-    <div style="
-      background: #1F4591;
-      padding: 20px;
-      border-radius: 12px;
-      position: relative;
-      text-align: center;">
+  <div id="chartModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); justify-content: center; align-items: center; z-index: 1000;">
+    <div style="background: #1F4591; padding: 20px; border-radius: 12px; position: relative; text-align: center; min-width: 540px;">
       
-      <button id="closeChartBtn" style="
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        font-size: 20px;
-        background: transparent;
-        border: none;
-        color: white;
-        cursor: pointer;">✖</button>
+      <button id="closeChartBtn" style="position: absolute; top: 10px; right: 10px; font-size: 20px; background: transparent; border: none; color: white; cursor: pointer;">✖</button>
 
       <div id="highestTitle" style="color: white; font-size: 2.2vh; margin-bottom: 10px;">
         🏆 Xếp hạng: --
@@ -107,30 +46,30 @@
         Hệ thống không lỗi. Chỉ có bạn lỗi. Hãy phản xạ nhanh hơn, nhiều lần hơn.
       </div>
 
-     
+      <!-- Nút mũi tên toggle danh sách rank -->
+      <div id="toggleRankList" style="position: absolute; left: -24px; top: 50%; transform: translateY(-50%) rotate(0deg); cursor: pointer; transition: transform 0.3s;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="white" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+
+      <!-- Danh sách rank -->
+      <div id="rankList" style="display: none; position: absolute; left: -240px; top: 0; bottom: 0; width: 220px; background: #1A3478; overflow-y: auto; padding: 12px; color: white; border-top-left-radius: 12px; border-bottom-left-radius: 12px;">
+        <!-- Nội dung JS sẽ render -->
+      </div>
+
       <canvas id="chartCanvas" width="500" height="250" style="margin-top: 20px;"></canvas>
-<!-- Nhóm nút chế độ + reset chung hàng, căn giữa -->
-<div id="chartModeButtons" style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
-  <button class="chart-mode-btn" data-mode="easy">Dễ</button>
-  <button class="chart-mode-btn" data-mode="medium">Trung bình</button>
-  <button class="chart-mode-btn" data-mode="hard">Khó</button>
 
-  <!-- Nút reset icon -->
-  <button id="resetScoresBtn" style="
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 4px;
-    display: flex;
-    align-items: center;
-  " title="Xóa dữ liệu">
-    <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" fill="white">
-      <path d="M12 6V4L8 8l4 4V9c2.76 0 5 2.24 5 5 0 1.29-.49 2.47-1.29 3.36l1.42 1.42C18.4 17.37 19 15.76 19 14c0-3.87-3.13-7-7-7zm-5.71.64L4.86 8.07C3.6 9.63 3 11.24 3 13c0 3.87 3.13 7 7 7v2l4-4-4-4v2c-2.76 0-5-2.24-5-5 0-1.29.49-2.47 1.29-3.36z"/>
-    </svg>
-  </button>
-</div>
+      <div id="chartModeButtons" style="display: flex; justify-content: center; gap: 12px; margin-top: 30px;">
+        <button class="chart-mode-btn" data-mode="easy">Dễ</button>
+        <button class="chart-mode-btn" data-mode="medium">Trung bình</button>
+        <button class="chart-mode-btn" data-mode="hard">Khó</button>
 
-
+        <!-- Nút reset -->
+        <button id="resetScoresBtn" style="background: transparent; border: none; cursor: pointer; padding: 4px; display: flex; align-items: center;" title="Xóa dữ liệu">
+          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 0 24 24" fill="white">
+            <path d="M12 6V4L8 8l4 4V9c2.76 0 5 2.24 5 5 0 1.29-.49 2.47-1.29 3.36l1.42 1.42C18.4 17.37 19 15.76 19 14c0-3.87-3.13-7-7-7zm-5.71.64L4.86 8.07C3.6 9.63 3 11.24 3 13c0 3.87 3.13 7 7 7v2l4-4-4-4v2c-2.76 0-5-2.24-5-5 0-1.29.49-2.47 1.29-3.36z"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 
