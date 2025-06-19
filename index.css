@@ -1,53 +1,58 @@
 body {
-  background-color: #0B132B;
   margin: 0;
   font-family: 'Montserrat', sans-serif;
+  background-color: #1F4591;
 }
 
 .top-bar {
   position: absolute;
   top: 20px;
+  left: 30px;
   right: 30px;
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 14px;
   color: white;
   font-size: 1.8vh;
+  z-index: 100;
 }
 
-.top-bar button {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-}
-
-.top-bar svg {
-  width: 28px;
-  height: 28px;
-  fill: currentColor;
-  stroke: none;
+.mode-selector {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100vw;
   height: 100vh;
+  overflow: hidden;
+  position: relative;
 }
 
 .clickarea {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100vw;
   height: 100vh;
+  background-color: #1F4591;
+  color: white;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #1F4591;
-  color: white;
-  cursor: pointer;
   transition: background-color 0.3s;
+  z-index: 1;
+  cursor: pointer;
+}
+
+#circleContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 500;
+  pointer-events: none;
 }
 
 .message {
@@ -63,7 +68,21 @@ body {
   text-align: center;
 }
 
-.popup {
+#showChartBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}
+
+#showChartBtn svg {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
+
+/* Modal */
+#chartModal {
   display: none;
   position: fixed;
   inset: 0;
@@ -73,44 +92,70 @@ body {
   z-index: 1000;
 }
 
-.popup-content {
+.chart-content {
   background: #1F4591;
   padding: 20px;
   border-radius: 12px;
-  text-align: center;
+  display: flex;
+  gap: 20px;
+  width: 90%;
+  max-width: 900px;
+  box-sizing: border-box;
+}
+
+#rankList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #173A78;
+  padding: 12px;
+  border-radius: 8px;
+  min-width: 140px;
+}
+
+.rank-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.2vh;
+  color: white;
+}
+
+.rank-item img {
+  height: 20px;
+  width: auto;
+}
+
+.chart-main {
+  flex: 1;
   position: relative;
-}
-.red {
-  background-color: #4d120e;
+  color: white;
 }
 
-.green {
-  background-color: green;
+#closeChartBtn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 20px;
+  background: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
 
-.yellow {
-  background-color: #e0c000; /* vàng sẫm hơn */
+#highestTitle {
+  font-size: 2.2vh;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
-.pink {
-  background-color: #d87093; /* hồng sẫm */
+.chart-subtext {
+  color: #ccc;
+  font-size: 2vh;
+  text-align: center;
+  margin-top: 30px;
 }
 
-.cyan {
-  background-color: #20b2aa; /* xanh ngọc sẫm */
-}
-
-.orange {
-  background-color: orange;
-}
-
-.purple {
-  background-color: purple;
-}
-
-.blue {
-  background-color: #1F4591; /* màu mặc định */
-}
 .chart-mode-btn {
   background-color: #ffffff22;
   color: white;
@@ -119,27 +164,40 @@ body {
   padding: 6px 12px;
   margin: 0 4px;
   cursor: pointer;
-  font-size: 1.6vh;
+  font-size: 3vh;
 }
 
 .chart-mode-btn:hover {
   background-color: #ffffff44;
 }
-.green-circle {
-  position: absolute;
-  border-radius: 50%;
-  background-color: green;
-  z-index: 9999;
-  pointer-events: auto;
-  cursor: pointer;
+
+#chartModeButtons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
 }
 
-#currentTitle {
-  font-size: 2.2vh; /* tăng từ 1.8vh */
+
+
+.red { background-color: #4d120e; }
+.green { background-color: green; }
+.yellow { background-color: #e0c000; }
+.pink { background-color: #d87093; }
+.cyan { background-color: #20b2aa; }
+.orange { background-color: orange; }
+.purple { background-color: purple; }
+.blue { background-color: #1F4591; }
+
+.target-circle {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 9999;
+  cursor: pointer;
+  pointer-events: auto;
 }
-#currentTitle img {
-  height: 24px;    /* tăng từ 20px */
-}
+
 .rank-display {
   display: flex;
   align-items: center;
@@ -147,30 +205,197 @@ body {
   gap: 8px;
   font-size: 2.2vh;
   font-weight: bold;
+  margin-top: 10px;
 }
+
 .rank-display img {
   height: 24px;
 }
 
 .xp-bar {
   width: 100%;
+  max-width: 500px;
   height: 3px;
   background: rgba(255,255,255,0.2);
   border-radius: 3px;
-  margin: 4px 0 2px;
+  margin: 10px auto 2px;
 }
+
 .xp-fill {
   height: 100%;
   background: #4FC3F7;
   border-radius: 3px;
 }
+
 .xp-text {
   font-size: 1.2vh;
   color: white;
   text-align: center;
 }
-.target-circle {
-  border-radius: 50%;
-  cursor: pointer;
-  z-index: 9999;
+#resetContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
 }
+
+#resetScoresBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+}
+
+.intro-screen {
+  position: fixed;
+  inset: 0;
+  background: #1F4591;
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.intro-box {
+  background: #173A78;
+  padding: 40px 30px;
+  border-radius: 16px;
+  text-align: center;
+  width: 90%;
+  max-width: 360px;
+}
+
+.intro-box h1 {
+  font-size: 2.8vh;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.intro-desc {
+  font-size: 1.8vh;
+  margin-bottom: 24px;
+  line-height: 1.5;
+  color: #e0e0e0;
+}
+
+.intro-select {
+  margin-bottom: 20px;
+  font-size: 1.6vh;
+  text-align: left;
+}
+
+.intro-select label {
+  display: block;
+  margin-bottom: 6px;
+  color: #cccccc;
+}
+
+#introMode {
+  width: 100%;
+  padding: 8px;
+  font-size: 1.6vh;
+  border-radius: 6px;
+  border: none;
+  background: #fff;
+  color: #000;
+}
+
+#startBtn {
+  width: 100%;
+  background-color: #4FC3F7;
+  color: #000;
+  font-weight: bold;
+  font-size: 1.8vh;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#startBtn:hover {
+  background-color: #81D4FA;
+}
+.intro-field {
+  margin-bottom: 20px;
+  text-align: left;
+  font-size: 1.6vh;
+}
+
+.intro-field label {
+  display: block;
+  margin-bottom: 6px;
+  color: #ccc;
+}
+
+#playerName {
+  width: 100%;
+  padding: 8px;
+  font-size: 1.6vh;
+  border-radius: 6px;
+  border: none;
+}
+
+.error-msg {
+  color: #ff6666;
+  font-size: 1.4vh;
+  margin-top: 4px;
+}
+
+#leaderboardModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 10000; /* đủ lớn để nằm trên cùng */
+}
+
+#leaderboardModal .leaderboard-box {
+  background: #1F4591;
+  padding: 24px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+  color: white;
+}
+
+.leaderboard-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 1.6vh;
+}
+
+.leaderboard-entry img.rank-img {
+  width: 28px;
+  height: auto;
+}
+
+.leaderboard-entry.top1 {
+  font-size: 2vh;
+  font-weight: bold;
+  background: rgba(255,255,255,0.1);
+  padding: 6px;
+  border-radius: 8px;
+}
+
+.popup .close-btn {
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
