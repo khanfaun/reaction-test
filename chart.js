@@ -4,6 +4,8 @@ export function drawChart(mode) {
   const list = JSON.parse(localStorage.getItem(`scores_${mode}`)) || []
   if (list.length === 0) return
 
+  window.__lastScoreBonus = '' // 🧼 Reset bonus khi xem thống kê
+
   const ctx = document.getElementById('chartCanvas')?.getContext('2d')
   if (!ctx) return
 
@@ -67,7 +69,11 @@ function computeScore(scores, mode) {
     let score = curved * weight
 
     let bonusText = ''
-    if (i > 0) {
+    if (
+      i > 0 &&
+      t <= maxTime &&
+      valid[i - 1] <= maxTime
+    ) {
       const prevT = valid[i - 1]
       if (t < prevT) {
         score += bonus
