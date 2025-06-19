@@ -251,6 +251,14 @@ function triggerHardModeCircles() {
           const reactionTime = new Date() - finishTime
           updateText(`${reactionTime}ms`, 'Click để tiếp tục')
           updateScores(reactionTime)
+          window.__lastScoreBonus = ''  // reset trước khi xử lý mới
+const scores = getScores(modeSelect.value)
+const lastTwo = scores.slice(-2)
+if (lastTwo.length === 2) {
+  const [prev, curr] = lastTwo
+  if (curr < prev) window.__lastScoreBonus = '+2.00%'
+  else if (curr > prev) window.__lastScoreBonus = '-2.00%'
+}
           document.querySelectorAll('.target-circle').forEach(c => c.remove())
           gameState = 'result'
           clickarea.classList.add('blue')
