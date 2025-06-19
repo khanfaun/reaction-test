@@ -174,18 +174,3 @@ body {
   cursor: pointer;
   z-index: 9999;
 }
-
-.rank-bonus {
-  font-size: 1.2vh;
-  color: #fff;
-  opacity: 1;
-  animation: fadeOut 2.5s forwards;
-  text-align: center;
-  margin-top: 4px;
-}
-
-@keyframes fadeOut {
-  0% { opacity: 1; }
-  80% { opacity: 0.5; }
-  100% { opacity: 0; }
-}
