@@ -1,7 +1,6 @@
 import { prepareEasyModeSequence } from './modes/easyMode.js'
 import { prepareMediumModeSequence } from './modes/mediumMode.js'
-import { prepareHardModeSequence } from './modes/hardMode.js'
-import { drawChart, getTitleFromScores } from './chart.js'
+import { drawChart, getTitleFromScores, ranks, thresholds } from './chart.js'
 
 let gameState = 'idle'
 let finishTime = null
@@ -11,6 +10,7 @@ let colorTimeout = null
 let hardModeTimeout = null
 
 const clickarea = document.querySelector('.clickarea')
+const circleContainer = document.getElementById('circleContainer')
 const message = document.querySelector('.message')
 const note = document.querySelector('.note')
 const modeSelect = document.getElementById('mode')
@@ -127,7 +127,7 @@ function handleClick(e) {
     if (modeSelect.value === 'hard') {
       clearTimeout(hardModeTimeout)
       updateText('Sai màu!', 'Click để tiếp tục')
-      document.querySelectorAll('.target-circle').forEach(c => c.remove())
+      circleContainer.innerHTML = ''
       gameState = 'result'
       clickarea.classList.add('blue')
       clickarea.style.backgroundColor = ''
@@ -163,7 +163,6 @@ modeSelect.addEventListener('change', () => {
 })
 
 document.getElementById('showChartBtn').addEventListener('click', () => {
-  document.querySelectorAll('.target-circle').forEach(c => c.remove())
   chartModal.style.display = 'flex'
   setTimeout(() => {
     const mode = modeSelect.value
@@ -197,7 +196,6 @@ function renderChartForMode(mode) {
   document.getElementById('rankList').innerHTML = renderAllRanks(getCurrentRankIndex(scores, mode))
 }
 
-
 document.querySelectorAll('.chart-mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const mode = btn.getAttribute('data-mode')
@@ -220,7 +218,7 @@ function triggerHardModeCircles() {
   resetColors()
   clickarea.classList.add('red')
   updateText('Đợi màu xanh lá')
-  document.querySelectorAll('.target-circle').forEach(c => c.remove())
+  circleContainer.innerHTML = ''
 
   const delay = Math.floor(Math.random() * 3000) + 3000
 
@@ -229,8 +227,8 @@ function triggerHardModeCircles() {
     const greenIndex = Math.floor(Math.random() * numCircles)
     const circles = []
 
-    updateText('', '') // Ẩn text
-    clickarea.style.backgroundColor = 'black' // Nền đen
+    updateText('', '')
+    clickarea.style.backgroundColor = 'black'
 
     for (let i = 0; i < numCircles; i++) {
       const circle = document.createElement('div')
@@ -259,7 +257,7 @@ function triggerHardModeCircles() {
           const reactionTime = new Date() - finishTime
           updateText(`${reactionTime}ms`, 'Click để tiếp tục')
           updateScores(reactionTime)
-          document.querySelectorAll('.target-circle').forEach(c => c.remove())
+          circleContainer.innerHTML = ''
           gameState = 'result'
           clickarea.classList.add('blue')
           clickarea.style.backgroundColor = ''
@@ -267,14 +265,14 @@ function triggerHardModeCircles() {
       } else {
         circle.onclick = () => {
           updateText('Sai màu!', 'Click để tiếp tục')
-          document.querySelectorAll('.target-circle').forEach(c => c.remove())
+          circleContainer.innerHTML = ''
           gameState = 'result'
           clickarea.classList.add('blue')
           clickarea.style.backgroundColor = ''
         }
       }
 
-      document.body.appendChild(circle)
+      circleContainer.appendChild(circle)
       circles.push({ x, y, size })
     }
   }, delay)
@@ -294,10 +292,15 @@ function getRandomDistractorColor() {
   return distractors[Math.floor(Math.random() * distractors.length)]
 }
 
-showIdleState()
-bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
-
-import { ranks } from './chart.js'
+function computeScore(scores, mode) {
+  const weight = { easy: 0.7, medium: 1.0, hard: 1.3 }[mode] || 1.0
+  const maxTime = { easy: 300, medium: 400, hard: 500 }[mode] || 300
+  const valid = scores.filter(t => t <= maxTime)
+  const validScores = valid.map(t => ((300 - t) / 150 * weight).toFixed(3)).map(Number)
+  const total = validScores.reduce((s, v) => s + v, 0)
+  const average = validScores.length ? total / validScores.length : 0
+  return { average, count: validScores.length }
+}
 
 function getCurrentRankIndex(scores, mode) {
   const { average, count } = computeScore(scores, mode)
@@ -323,3 +326,5 @@ function renderAllRanks(currentIdx) {
   }).join('')
 }
 
+showIdleState()
+bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
