@@ -52,38 +52,13 @@ export function drawChart(mode) {
   chartInstance = new Chart(ctx, config)
 }
 
+// 🎯 Tính điểm trung bình phản xạ tốt với maxTime riêng cho từng chế độ
 function computeScore(scores, mode) {
   const weight = { easy: 0.7, medium: 1.0, hard: 1.3 }[mode] || 1.0
-  const maxTime = { easy: 300, medium: 300, hard: 350 }[mode] || 300
-  const bonus = 0.02
+  const maxTime = { easy: 300, medium: 400, hard: 500 }[mode] || 300
 
   const valid = scores.filter(t => t <= maxTime)
-  const validScores = []
-
-  for (let i = 0; i < valid.length; i++) {
-    const t = valid[i]
-    const speed = (300 - t) / 150
-    const curved = Math.max(Math.pow(speed, 2), 0)
-    let score = curved * weight
-
-    let bonusText = ''
-    if (i > 0) {
-      const prevT = valid[i - 1]
-      if (t < prevT) {
-        score += bonus
-        bonusText = `+${(bonus * 100).toFixed(2)}%`
-      } else if (t > prevT) {
-        score -= bonus
-        bonusText = `-${(bonus * 100).toFixed(2)}%`
-      }
-      window.__lastScoreBonus = bonusText
-    } else {
-      window.__lastScoreBonus = ''
-    }
-
-    validScores.push(+score.toFixed(3))
-  }
-
+  const validScores = valid.map(t => ((300 - t) / 150 * weight).toFixed(3)).map(Number)
   const total = validScores.reduce((s, v) => s + v, 0)
   const average = validScores.length ? total / validScores.length : 0
   return { average, count: validScores.length }
@@ -126,11 +101,7 @@ function generateRankHTML(idx, progressPercent = 0) {
   const bar = idx === 0 ? '' :
     `<div class="xp-bar"><div class="xp-fill" style="width:${progressPercent}%"></div></div>
      <div class="xp-text">${progressPercent.toFixed(1)}% đến ${ranks[idx+1]}</div>`
-
-  const bonusTag = window.__lastScoreBonus
-    ? `<div class="rank-bonus">${window.__lastScoreBonus}</div>` : ''
-
-  return `<div class="rank-display">${img}${name}</div>${bar}${bonusTag}`
+  return `<div class="rank-display">${img}${name}</div>${bar}`
 }
 
 export function getTitleFromScores(scores, mode) {
@@ -146,6 +117,7 @@ export function getTitleFromScores(scores, mode) {
     }
   }
 
+  // Tính % đến rank tiếp theo
   let progress = 0
   if (idx < thresholds.length) {
     const cur = thresholds[idx - 1] || { avg: 0, count: 1 }
