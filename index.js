@@ -194,8 +194,9 @@ function renderChartForMode(mode) {
   const scores = getScores(mode)
   drawChart(mode)
   highestTitle.innerHTML = `${getTitleFromScores(scores, mode)}`
-  document.getElementById('rankList').innerHTML = getTitleFromScores(scores, mode)
+  document.getElementById('rankList').innerHTML = renderAllRanks(getCurrentRankIndex(scores, mode))
 }
+
 
 document.querySelectorAll('.chart-mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -295,3 +296,30 @@ function getRandomDistractorColor() {
 
 showIdleState()
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+
+import { ranks } from './chart.js'
+
+function getCurrentRankIndex(scores, mode) {
+  const { average, count } = computeScore(scores, mode)
+  let idx = 0
+  for (let i = thresholds.length - 1; i >= 0; i--) {
+    if (average >= thresholds[i].avg && count >= thresholds[i].count) {
+      idx = i + 1
+      break
+    }
+  }
+  return idx
+}
+
+function renderAllRanks(currentIdx) {
+  return ranks.map((name, idx) => {
+    const active = idx === currentIdx ? 'style="filter: drop-shadow(0 0 6px #fff); font-weight: bold;"' : ''
+    return `
+      <div class="rank-item" ${active}>
+        <img src="img/skillgroup${idx}.png" alt="${name}">
+        <span>${name}</span>
+      </div>
+    `
+  }).join('')
+}
+
