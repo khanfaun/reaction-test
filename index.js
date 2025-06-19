@@ -129,35 +129,14 @@ function handleClick(e) {
       document.querySelectorAll('.target-circle').forEach(c => c.remove())
       gameState = 'result'
       clickarea.classList.add('blue')
-   } else if (currentColor === 'green') {
-  gameState = 'result'
-  resetColors()
-  clickarea.classList.add('blue')
-
-  const reactionTime = new Date() - finishTime
-  updateText(`${reactionTime}ms`, 'Click để tiếp tục')
-
-  // 🧠 Tính % XP trước
-  const mode = modeSelect.value
-  const scoresBefore = getScores(mode)
-  const htmlBefore = getTitleFromScores(scoresBefore, mode)
-  const matchBefore = htmlBefore.match(/width:(\d+(?:\.\d+)?)%/)
-  const progressBefore = matchBefore ? parseFloat(matchBefore[1]) : 0
-
-  // Cập nhật điểm
-  updateScores(reactionTime)
-
-  // 🧠 Tính % XP sau
-  const scoresAfter = getScores(mode)
-  const htmlAfter = getTitleFromScores(scoresAfter, mode)
-  const matchAfter = htmlAfter.match(/width:(\d+(?:\.\d+)?)%/)
-  const progressAfter = matchAfter ? parseFloat(matchAfter[1]) : 0
-
-  const diff = +(progressAfter - progressBefore).toFixed(2)
-  window.__lastScoreBonus = diff === 0 ? '' : (diff > 0 ? `+${diff}%` : `${diff}%`)
-  currentTitle.innerHTML = htmlAfter
-}
- else {
+    } else if (currentColor === 'green') {
+      gameState = 'result'
+      resetColors()
+      clickarea.classList.add('blue')
+      const reactionTime = new Date() - finishTime
+      updateText(`${reactionTime}ms`, 'Click để tiếp tục')
+      updateScores(reactionTime)
+    } else {
       gameState = 'result'
       clearTimeout(colorTimeout)
       resetColors()
@@ -272,45 +251,17 @@ function triggerHardModeCircles() {
           const reactionTime = new Date() - finishTime
           updateText(`${reactionTime}ms`, 'Click để tiếp tục')
           updateScores(reactionTime)
-          window.__lastScoreBonus = ''  // reset trước khi xử lý mới
-const scores = getScores(modeSelect.value)
-const lastTwo = scores.slice(-2)
-if (lastTwo.length === 2) {
-  const [prev, curr] = lastTwo
-  if (curr < prev) window.__lastScoreBonus = '+2.00%'
-  else if (curr > prev) window.__lastScoreBonus = '-2.00%'
-}
           document.querySelectorAll('.target-circle').forEach(c => c.remove())
           gameState = 'result'
           clickarea.classList.add('blue')
         }
       } else {
-       circle.onclick = () => {
-  const reactionTime = new Date() - finishTime
-  updateText(`${reactionTime}ms`, 'Click để tiếp tục')
-
-  const mode = modeSelect.value
-  const scoresBefore = getScores(mode)
-  const htmlBefore = getTitleFromScores(scoresBefore, mode)
-  const matchBefore = htmlBefore.match(/width:(\d+(?:\.\d+)?)%/)
-  const progressBefore = matchBefore ? parseFloat(matchBefore[1]) : 0
-
-  updateScores(reactionTime)
-
-  const scoresAfter = getScores(mode)
-  const htmlAfter = getTitleFromScores(scoresAfter, mode)
-  const matchAfter = htmlAfter.match(/width:(\d+(?:\.\d+)?)%/)
-  const progressAfter = matchAfter ? parseFloat(matchAfter[1]) : 0
-
-  const diff = +(progressAfter - progressBefore).toFixed(2)
-  window.__lastScoreBonus = diff === 0 ? '' : (diff > 0 ? `+${diff}%` : `${diff}%`)
-  currentTitle.innerHTML = htmlAfter
-
-  document.querySelectorAll('.target-circle').forEach(c => c.remove())
-  gameState = 'result'
-  clickarea.classList.add('blue')
-}
-
+        circle.onclick = () => {
+          updateText('Sai màu!', 'Click để tiếp tục')
+          document.querySelectorAll('.target-circle').forEach(c => c.remove())
+          gameState = 'result'
+          clickarea.classList.add('blue')
+        }
       }
 
       document.body.appendChild(circle)
