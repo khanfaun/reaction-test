@@ -50,6 +50,7 @@ function applyContrastColorToChartBtn() {
 
 function resetColors() {
   clickarea.className = 'clickarea'
+  clickarea.style.backgroundColor = ''
 }
 
 function updateText(msg, noteMsg = '') {
@@ -129,6 +130,7 @@ function handleClick(e) {
       document.querySelectorAll('.target-circle').forEach(c => c.remove())
       gameState = 'result'
       clickarea.classList.add('blue')
+      clickarea.style.backgroundColor = ''
     } else if (currentColor === 'green') {
       gameState = 'result'
       resetColors()
@@ -161,6 +163,7 @@ modeSelect.addEventListener('change', () => {
 })
 
 document.getElementById('showChartBtn').addEventListener('click', () => {
+  document.querySelectorAll('.target-circle').forEach(c => c.remove())
   chartModal.style.display = 'flex'
   setTimeout(() => {
     const mode = modeSelect.value
@@ -191,6 +194,7 @@ function renderChartForMode(mode) {
   const scores = getScores(mode)
   drawChart(mode)
   highestTitle.innerHTML = `${getTitleFromScores(scores, mode)}`
+  document.getElementById('rankList').innerHTML = getTitleFromScores(scores, mode)
 }
 
 document.querySelectorAll('.chart-mode-btn').forEach(btn => {
@@ -224,6 +228,9 @@ function triggerHardModeCircles() {
     const greenIndex = Math.floor(Math.random() * numCircles)
     const circles = []
 
+    updateText('', '') // Ẩn text
+    clickarea.style.backgroundColor = 'black' // Nền đen
+
     for (let i = 0; i < numCircles; i++) {
       const circle = document.createElement('div')
       circle.classList.add('target-circle')
@@ -254,6 +261,7 @@ function triggerHardModeCircles() {
           document.querySelectorAll('.target-circle').forEach(c => c.remove())
           gameState = 'result'
           clickarea.classList.add('blue')
+          clickarea.style.backgroundColor = ''
         }
       } else {
         circle.onclick = () => {
@@ -261,6 +269,7 @@ function triggerHardModeCircles() {
           document.querySelectorAll('.target-circle').forEach(c => c.remove())
           gameState = 'result'
           clickarea.classList.add('blue')
+          clickarea.style.backgroundColor = ''
         }
       }
 
