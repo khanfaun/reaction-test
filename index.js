@@ -1,6 +1,6 @@
 import { prepareEasyModeSequence } from './modes/easyMode.js'
 import { prepareMediumModeSequence } from './modes/mediumMode.js'
-import { drawChart, getTitleFromScores, ranks, thresholds } from './chart.js'
+import { drawChart, getTitleFromScores, ranks, thresholds, computeScore } from './chart.js'
 
 let gameState = 'idle'
 let finishTime = null
@@ -18,6 +18,7 @@ const bestScoreSpan = document.getElementById('bestScore')
 const chartModal = document.getElementById('chartModal')
 const currentTitle = document.getElementById('currentTitle')
 const highestTitle = document.getElementById('highestTitle')
+const signOutBtn = document.getElementById('signOutBtn')
 
 const colorMap = {
   blue: '#1F4591',
@@ -292,16 +293,6 @@ function getRandomDistractorColor() {
   return distractors[Math.floor(Math.random() * distractors.length)]
 }
 
-function computeScore(scores, mode) {
-  const weight = { easy: 0.7, medium: 1.0, hard: 1.3 }[mode] || 1.0
-  const maxTime = { easy: 300, medium: 400, hard: 500 }[mode] || 300
-  const valid = scores.filter(t => t <= maxTime)
-  const validScores = valid.map(t => ((300 - t) / 150 * weight).toFixed(3)).map(Number)
-  const total = validScores.reduce((s, v) => s + v, 0)
-  const average = validScores.length ? total / validScores.length : 0
-  return { average, count: validScores.length }
-}
-
 function getCurrentRankIndex(scores, mode) {
   const { average, count } = computeScore(scores, mode)
   let idx = 0
@@ -326,5 +317,113 @@ function renderAllRanks(currentIdx) {
   }).join('')
 }
 
-showIdleState()
+// 🔐 Đăng nhập, kiểm tra trùng tên, lưu local
+
+function isNameTaken(name) {
+  const takenNames = JSON.parse(localStorage.getItem('takenNames') || '[]')
+  return takenNames.includes(name.toLowerCase())
+}
+
+function registerName(name) {
+  const taken = JSON.parse(localStorage.getItem('takenNames') || '[]')
+  taken.push(name.toLowerCase())
+  localStorage.setItem('takenNames', JSON.stringify(taken))
+}
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  const nameInput = document.getElementById('playerName')
+  const playerName = nameInput.value.trim()
+  const nameError = document.getElementById('nameError')
+
+  if (!playerName) {
+    nameError.textContent = 'Vui lòng nhập tên!'
+    nameError.style.display = 'block'
+    return
+  }
+
+  if (isNameTaken(playerName)) {
+    nameError.textContent = 'Tên đã tồn tại, hãy chọn tên khác!'
+    nameError.style.display = 'block'
+    return
+  }
+
+  nameError.style.display = 'none'
+  localStorage.setItem('playerName', playerName)
+  registerName(playerName)
+
+  const selectedMode = document.getElementById('introMode').value
+  modeSelect.value = selectedMode
+
+  document.getElementById('introScreen').style.display = 'none'
+  signOutBtn.style.display = 'inline-block'
+  showIdleState()
+})
+
+signOutBtn.addEventListener('click', () => {
+  localStorage.removeItem('playerName')
+  document.getElementById('introScreen').style.display = 'flex'
+  signOutBtn.style.display = 'none'
+})
+
+// Tự đăng nhập nếu đã lưu tên
+window.addEventListener('DOMContentLoaded', () => {
+  const savedName = localStorage.getItem('playerName')
+  if (savedName) {
+    document.getElementById('introScreen').style.display = 'none'
+    signOutBtn.style.display = 'inline-block'
+    showIdleState()
+  } else {
+    document.getElementById('introScreen').style.display = 'flex'
+  }
+})
+
 bestScoreSpan.textContent = `Best: ${getBestScore()} ms`
+
+
+document.getElementById('showLeaderboardBtn').addEventListener('click', () => {
+  document.getElementById('leaderboardModal').style.display = 'flex'
+  fetchLeaderboard('easy')
+})
+
+document.getElementById('closeLeaderboardBtn').addEventListener('click', () => {
+  document.getElementById('leaderboardModal').style.display = 'none'
+})
+
+document.querySelectorAll('#leaderboardModal .chart-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const mode = btn.getAttribute('data-mode')
+    fetchLeaderboard(mode)
+  })
+})
+
+function fetchLeaderboard(mode) {
+  fetch(`https://your-backend-url/leaderboard?mode=${mode}`)
+    .then(res => res.json())
+    .then(data => renderLeaderboard(data, mode))
+    .catch(err => {
+      console.error('Lỗi lấy dữ liệu leaderboard:', err)
+      document.getElementById('leaderboardList').innerHTML = '<p style="color:white">Không tải được dữ liệu.</p>'
+    })
+}
+
+function renderLeaderboard(data, mode) {
+  const container = document.getElementById('leaderboardList')
+  container.innerHTML = ''
+
+  data.slice(0, 5).forEach((entry, index) => {
+    const rankIdx = getCurrentRankIndex([{ score: entry.score }], mode)
+    const rankImg = `img/skillgroup${rankIdx}.png`
+
+    const div = document.createElement('div')
+    div.className = 'leaderboard-entry'
+    if (index === 0) div.classList.add('top1')
+
+    div.innerHTML = `
+      <span>#${index + 1}</span>
+      <img src="${rankImg}" alt="rank" class="rank-img">
+      <span>${entry.name}</span>
+      <span>${entry.score} ms <small>(${entry.attempts} lần)</small></span>
+    `
+    container.appendChild(div)
+  })
+}
