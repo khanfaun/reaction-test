@@ -4,8 +4,6 @@ export function drawChart(mode) {
   const list = JSON.parse(localStorage.getItem(`scores_${mode}`)) || []
   if (list.length === 0) return
 
-  window.__lastScoreBonus = '' // 🧼 Reset bonus khi xem thống kê
-
   const ctx = document.getElementById('chartCanvas')?.getContext('2d')
   if (!ctx) return
 
@@ -57,7 +55,6 @@ export function drawChart(mode) {
 function computeScore(scores, mode) {
   const weight = { easy: 0.7, medium: 1.0, hard: 1.3 }[mode] || 1.0
   const maxTime = { easy: 300, medium: 300, hard: 350 }[mode] || 300
-  const bonus = 0.02
 
   const valid = scores.filter(t => t <= maxTime)
   const validScores = []
@@ -66,28 +63,8 @@ function computeScore(scores, mode) {
     const t = valid[i]
     const speed = (300 - t) / 150
     const curved = Math.max(Math.pow(speed, 2), 0)
-    let score = curved * weight
-
-    let bonusText = ''
-    if (
-      i > 0 &&
-      t <= maxTime &&
-      valid[i - 1] <= maxTime
-    ) {
-      const prevT = valid[i - 1]
-      if (t < prevT) {
-        score += bonus
-        bonusText = `+${(bonus * 100).toFixed(2)}%`
-      } else if (t > prevT) {
-        score -= bonus
-        bonusText = `-${(bonus * 100).toFixed(2)}%`
-      }
-      window.__lastScoreBonus = bonusText
-    } else {
-      window.__lastScoreBonus = ''
-    }
-
-    validScores.push(+score.toFixed(3))
+    const score = +(curved * weight).toFixed(3)
+    validScores.push(score)
   }
 
   const total = validScores.reduce((s, v) => s + v, 0)
@@ -140,7 +117,10 @@ function generateRankHTML(idx, progressPercent = 0) {
 }
 
 export function getTitleFromScores(scores, mode) {
-  if (!scores.length) return generateRankHTML(0)
+  if (!scores.length) {
+    window.__lastScoreBonus = ''
+    return generateRankHTML(0)
+  }
 
   const { average, count } = computeScore(scores, mode)
 
