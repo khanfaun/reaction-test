@@ -285,12 +285,32 @@ if (lastTwo.length === 2) {
           clickarea.classList.add('blue')
         }
       } else {
-        circle.onclick = () => {
-          updateText('Sai màu!', 'Click để tiếp tục')
-          document.querySelectorAll('.target-circle').forEach(c => c.remove())
-          gameState = 'result'
-          clickarea.classList.add('blue')
-        }
+       circle.onclick = () => {
+  const reactionTime = new Date() - finishTime
+  updateText(`${reactionTime}ms`, 'Click để tiếp tục')
+
+  const mode = modeSelect.value
+  const scoresBefore = getScores(mode)
+  const htmlBefore = getTitleFromScores(scoresBefore, mode)
+  const matchBefore = htmlBefore.match(/width:(\d+(?:\.\d+)?)%/)
+  const progressBefore = matchBefore ? parseFloat(matchBefore[1]) : 0
+
+  updateScores(reactionTime)
+
+  const scoresAfter = getScores(mode)
+  const htmlAfter = getTitleFromScores(scoresAfter, mode)
+  const matchAfter = htmlAfter.match(/width:(\d+(?:\.\d+)?)%/)
+  const progressAfter = matchAfter ? parseFloat(matchAfter[1]) : 0
+
+  const diff = +(progressAfter - progressBefore).toFixed(2)
+  window.__lastScoreBonus = diff === 0 ? '' : (diff > 0 ? `+${diff}%` : `${diff}%`)
+  currentTitle.innerHTML = htmlAfter
+
+  document.querySelectorAll('.target-circle').forEach(c => c.remove())
+  gameState = 'result'
+  clickarea.classList.add('blue')
+}
+
       }
 
       document.body.appendChild(circle)
